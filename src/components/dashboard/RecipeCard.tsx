@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ChefHat, Clock, Bookmark, Trash2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -103,7 +102,7 @@ export function RecipeCard({
         <img
           src={imageUrl}
           alt={title}
-          className="w-full h-full object-cover transition-transform hover:scale-105 duration-700"
+          className="w-full h-full object-cover transition-all duration-300 hover:opacity-90"
         />
         <div className="absolute top-3 left-3">
           {levelIcon[level]}
