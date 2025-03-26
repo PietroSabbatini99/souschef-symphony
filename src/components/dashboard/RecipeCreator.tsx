@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -41,6 +42,7 @@ interface GeneratedRecipe {
   difficulty: string;
   image_prompt: string;
   image_url?: string;
+  meal_type: string;
 }
 
 type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
@@ -95,18 +97,6 @@ export function RecipeCreator() {
     }));
   };
 
-  const getAllIngredients = () => {
-    const allIngredients = new Set<string>();
-    
-    Object.values(mealTypeIngredients).forEach(ingredients => {
-      ingredients.forEach(ingredient => {
-        allIngredients.add(ingredient);
-      });
-    });
-    
-    return Array.from(allIngredients);
-  };
-
   const handleGenerateRecipes = async () => {
     if (!selectedCuisine) {
       toast.error("Please select a cuisine style first");
@@ -122,11 +112,17 @@ export function RecipeCreator() {
       setIsGenerating(true);
       setGeneratedRecipes([]);
       
+      // Only include the selected meal types with their ingredients
+      const mealTypeIngredientsToSend = {};
+      selectedMealTypes.forEach(mealType => {
+        mealTypeIngredientsToSend[mealType] = mealTypeIngredients[mealType];
+      });
+      
       const response = await supabase.functions.invoke('generate-recipe', {
         body: {
           cuisineLevel: selectedCuisine,
-          ingredients: getAllIngredients(),
-          mealType: selectedMealTypes.join(','),
+          ingredients: mealTypeIngredientsToSend,
+          mealTypes: selectedMealTypes,
           count: recipeCount
         }
       });
@@ -164,8 +160,7 @@ export function RecipeCreator() {
       const recipe = generatedRecipes[selectedRecipeIndex];
       const today = new Date();
       
-      // Save recipe directly to the database instead of using the edge function
-      // 1. Save the recipe
+      // Save recipe directly to the database
       const { data: savedRecipe, error: recipeError } = await supabase
         .from('recipes')
         .insert({
@@ -185,38 +180,24 @@ export function RecipeCreator() {
         throw new Error(`Failed to save recipe: ${recipeError.message}`);
       }
 
-      // 2. Create meal plan entries for each selected meal type
-      const mealPlansPromises = selectedMealTypes.map(mealType => {
-        return supabase
-          .from('meal_plans')
-          .insert({
-            recipe_id: savedRecipe.id,
-            user_id: user.id,
-            meal_type: mealType,
-            planned_date: format(today, 'yyyy-MM-dd')
-          });
-      });
-
-      // Wait for all meal plan entries to be created
-      const mealPlanResults = await Promise.allSettled(mealPlansPromises);
+      // Create a meal plan entry for the recipe's meal type
+      const mealType = recipe.meal_type || selectedMealTypes[0];
       
-      // Check for errors in creating meal plans
-      const mealPlanErrors = mealPlanResults
-        .filter(result => result.status === 'rejected' || (result.status === 'fulfilled' && result.value.error))
-        .map(result => {
-          if (result.status === 'rejected') {
-            return result.reason;
-          } else {
-            return (result as PromiseFulfilledResult<{error: any}>).value.error;
-          }
+      const { error: mealPlanError } = await supabase
+        .from('meal_plans')
+        .insert({
+          recipe_id: savedRecipe.id,
+          user_id: user.id,
+          meal_type: mealType,
+          planned_date: format(today, 'yyyy-MM-dd')
         });
-        
-      if (mealPlanErrors.length > 0) {
-        console.error("Meal plan insert errors:", mealPlanErrors);
-        // Log errors but don't throw since the recipe was saved successfully
-      }
 
-      toast.success("Recipe saved successfully!");
+      if (mealPlanError) {
+        console.error("Error creating meal plan:", mealPlanError);
+        toast.error(`Recipe saved but couldn't add to meal plan: ${mealPlanError.message}`);
+      } else {
+        toast.success("Recipe saved and added to meal plan!");
+      }
       
       // Close the dialog after saving
       setShowRecipeDialog(false);
@@ -244,6 +225,14 @@ export function RecipeCreator() {
         return <Utensils className="h-4 w-4" />;
     }
   };
+
+  // Group recipes by meal type for easier navigation
+  const recipesByMealType = generatedRecipes.reduce((acc, recipe, index) => {
+    const mealType = recipe.meal_type || 'other';
+    if (!acc[mealType]) acc[mealType] = [];
+    acc[mealType].push({recipe, index});
+    return acc;
+  }, {} as Record<string, {recipe: GeneratedRecipe, index: number}[]>);
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -355,25 +344,30 @@ export function RecipeCreator() {
                     <Badge variant="outline" className="flex items-center gap-1.5">
                       <ChefHat size={14} /> {selectedRecipe.difficulty}
                     </Badge>
-                    {selectedMealTypes.map((mealType) => (
-                      <Badge key={mealType} variant="outline" className="flex items-center gap-1.5">
-                        {getMealTypeIcon(mealType)} {mealType}
-                      </Badge>
-                    ))}
+                    <Badge variant="outline" className="flex items-center gap-1.5">
+                      {getMealTypeIcon(selectedRecipe.meal_type as MealType)} {selectedRecipe.meal_type}
+                    </Badge>
                   </div>
 
-                  {generatedRecipes.length > 1 && (
-                    <div className="flex gap-2 flex-wrap">
-                      {generatedRecipes.map((_, index) => (
-                        <Button
-                          key={index}
-                          variant={index === selectedRecipeIndex ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setSelectedRecipeIndex(index)}
-                          className={index === selectedRecipeIndex ? "bg-souschef-red hover:bg-souschef-red-light" : ""}
-                        >
-                          Recipe {index + 1}
-                        </Button>
+                  {Object.keys(recipesByMealType).length > 0 && (
+                    <div className="space-y-2">
+                      {Object.entries(recipesByMealType).map(([mealType, recipes]) => (
+                        <div key={mealType} className="space-y-2">
+                          <div className="text-sm font-medium">{mealType.charAt(0).toUpperCase() + mealType.slice(1)} Recipes:</div>
+                          <div className="flex gap-2 flex-wrap">
+                            {recipes.map(({index}) => (
+                              <Button
+                                key={index}
+                                variant={index === selectedRecipeIndex ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => setSelectedRecipeIndex(index)}
+                                className={index === selectedRecipeIndex ? "bg-souschef-red hover:bg-souschef-red-light" : ""}
+                              >
+                                Recipe {index + 1}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
                       ))}
                     </div>
                   )}

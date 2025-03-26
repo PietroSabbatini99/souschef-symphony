@@ -18,18 +18,14 @@ serve(async (req) => {
   try {
     const { 
       cuisineLevel, 
-      ingredients, 
-      mealType = "dinner", 
+      ingredients = {},
+      mealTypes = ["dinner"],
       count = 1 
     } = await req.json();
 
     if (!cuisineLevel) {
       throw new Error("Cuisine level is required");
     }
-
-    // Parse meal types if they come as a comma-separated string
-    const mealTypes = mealType.includes(',') ? mealType.split(',') : [mealType];
-    const primaryMealType = mealTypes[0];  // Use the first meal type as primary for prompting
 
     // Map cuisine level to style descriptions
     const cuisineStyleDescriptions = {
@@ -40,22 +36,35 @@ serve(async (req) => {
 
     const styleDescription = cuisineStyleDescriptions[cuisineLevel] || cuisineStyleDescriptions.home;
     
-    let promptIngredients = "using common ingredients";
-    if (ingredients && ingredients.length > 0) {
-      promptIngredients = `using the following ingredients: ${ingredients.join(", ")}`;
-    }
+    // Generate a separate recipe for each meal type
+    const allRecipes = [];
+    
+    // Process each meal type
+    for (const mealType of mealTypes) {
+      console.log(`Generating recipe for meal type: ${mealType}`);
+      
+      let mealIngredients = ingredients[mealType] || [];
+      
+      // Skip empty meal types with no ingredients
+      if (mealIngredients.length === 0 && Object.keys(ingredients).length > 0) {
+        console.log(`Skipping ${mealType} as it has no ingredients`);
+        continue;
+      }
+      
+      let promptIngredients = "using common ingredients";
+      if (mealIngredients.length > 0) {
+        promptIngredients = `using the following ingredients: ${mealIngredients.join(", ")}`;
+      }
 
-    // Construct recipe generation prompt
-    const systemPrompt = `You are a professional chef specialized in creating ${styleDescription} recipes. Generate ${count > 1 ? count + ' different' : 'a'} ${primaryMealType} recipe${count > 1 ? 's' : ''} ${promptIngredients}.
+      // Construct recipe generation prompt for this meal type
+      const systemPrompt = `You are a professional chef specialized in creating ${styleDescription} recipes. Generate a ${mealType} recipe ${promptIngredients}.
 
 For the recipe name:
 - If cuisine level is "street": Create a catchy, simple name
 - If cuisine level is "home": Create a straightforward, approachable name
 - If cuisine level is "gourmet": Create an elegant, sophisticated name
 
-If additional meal types are specified (${mealTypes.length > 1 ? mealTypes.slice(1).join(', ') : 'none'}), make sure the recipe is suitable for those meal types as well.
-
-For each recipe, provide the following JSON structure:
+Provide the following JSON structure:
 {
   "title": "Recipe Title",
   "description": "Brief appetizing description of the dish",
@@ -63,60 +72,66 @@ For each recipe, provide the following JSON structure:
   "instructions": "Step by step cooking instructions",
   "cooking_time": cooking time in minutes (number only),
   "difficulty": "easy", "medium", or "hard" based on complexity,
-  "image_prompt": "A detailed description for generating an image of this dish"
+  "image_prompt": "A detailed description for generating an image of this dish",
+  "meal_type": "${mealType}"
 }`;
 
-    console.log("Sending request to OpenAI with prompt:", systemPrompt);
+      console.log(`Sending request to OpenAI for ${mealType} recipe`);
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Create ${count > 1 ? count + ' different' : 'a'} ${cuisineLevel} ${primaryMealType} recipe${count > 1 ? 's' : ''} ${promptIngredients}.` }
-        ],
-        temperature: 0.7,
-      }),
-    });
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: `Create a ${cuisineLevel} ${mealType} recipe ${promptIngredients}.` }
+          ],
+          temperature: 0.7,
+        }),
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("OpenAI API error:", errorData);
-      throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
-    }
-
-    const data = await response.json();
-    const content = data.choices[0].message.content;
-    
-    console.log("OpenAI response received:", content.substring(0, 100) + "...");
-    
-    // Parse the response to extract recipes
-    let recipes = [];
-    
-    try {
-      // Handle both array format and single object format
-      if (content.trim().startsWith('[')) {
-        recipes = JSON.parse(content);
-      } else if (content.trim().startsWith('{')) {
-        recipes = [JSON.parse(content)];
-      } else {
-        // Extract JSON objects from text if OpenAI didn't return proper JSON
-        const jsonMatches = content.match(/\{[\s\S]*?\}/g);
-        if (jsonMatches) {
-          recipes = jsonMatches.map(match => JSON.parse(match));
-        }
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error(`OpenAI API error for ${mealType}:`, errorData);
+        throw new Error(`OpenAI API error for ${mealType}: ${errorData.error?.message || 'Unknown error'}`);
       }
-    } catch (parseError) {
-      console.error("Error parsing OpenAI response:", parseError);
-      throw new Error("Failed to parse recipe data from OpenAI response");
+
+      const data = await response.json();
+      const content = data.choices[0].message.content;
+      
+      console.log(`OpenAI response received for ${mealType}:`, content.substring(0, 100) + "...");
+      
+      // Parse the response to extract recipe
+      try {
+        let recipe;
+        
+        // Handle both formats
+        if (content.trim().startsWith('{')) {
+          recipe = JSON.parse(content);
+        } else {
+          // Extract JSON objects from text if OpenAI didn't return proper JSON
+          const jsonMatch = content.match(/\{[\s\S]*?\}/);
+          if (jsonMatch) {
+            recipe = JSON.parse(jsonMatch[0]);
+          }
+        }
+        
+        if (recipe) {
+          // Ensure the meal_type is included in the recipe
+          recipe.meal_type = mealType;
+          allRecipes.push(recipe);
+        }
+      } catch (parseError) {
+        console.error(`Error parsing OpenAI response for ${mealType}:`, parseError);
+        throw new Error(`Failed to parse recipe data from OpenAI response for ${mealType}`);
+      }
     }
 
-    return new Response(JSON.stringify({ recipes }), {
+    return new Response(JSON.stringify({ recipes: allRecipes }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
