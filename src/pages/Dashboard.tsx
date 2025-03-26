@@ -19,12 +19,14 @@ import {
   Sparkles
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/context/AuthContext';
 
 const Dashboard = () => {
   const [selectedCuisine, setSelectedCuisine] = useState<CuisineLevel | null>(null);
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [activeTab, setActiveTab] = useState<'plan' | 'create'>('plan');
+  const { signOut, user } = useAuth();
 
   const handleAddIngredient = (ingredient: string) => {
     if (!selectedIngredients.includes(ingredient)) {
@@ -79,7 +81,11 @@ const Dashboard = () => {
             <Settings size={16} className="mr-2" />
             Settings
           </Button>
-          <Button variant="ghost" className="w-full justify-start text-gray-600">
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start text-gray-600"
+            onClick={signOut}
+          >
             <LogOut size={16} className="mr-2" />
             Logout
           </Button>

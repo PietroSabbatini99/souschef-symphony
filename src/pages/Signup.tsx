@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/ui/logo';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/context/AuthContext';
@@ -13,29 +12,36 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Loader2 } from 'lucide-react';
 
-const loginSchema = z.object({
+const signupSchema = z.object({
+  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string().min(6, 'Password must be at least 6 characters'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
 });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type SignupFormValues = z.infer<typeof signupSchema>;
 
-const Login = () => {
-  const { signIn, user } = useAuth();
+const Signup = () => {
+  const { signUp, user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<SignupFormValues>({
+    resolver: zodResolver(signupSchema),
     defaultValues: {
+      fullName: '',
       email: '',
       password: '',
+      confirmPassword: '',
     },
   });
 
-  const onSubmit = async (values: LoginFormValues) => {
+  const onSubmit = async (values: SignupFormValues) => {
     setIsLoading(true);
     try {
-      await signIn(values.email, values.password);
+      await signUp(values.email, values.password, values.fullName);
     } catch (error) {
       console.error(error);
     } finally {
@@ -57,12 +63,31 @@ const Login = () => {
         
         <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-gray-100 animate-scale-in">
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold">Welcome back</h1>
-            <p className="text-gray-600 mt-1">Sign in to continue to SousChef</p>
+            <h1 className="text-2xl font-bold">Create your account</h1>
+            <p className="text-gray-600 mt-1">Join SousChef and start cooking</p>
           </div>
           
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="fullName"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        placeholder="John Doe" 
+                        className="h-11"
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            
               <FormField
                 control={form.control}
                 name="email"
@@ -88,12 +113,27 @@ const Login = () => {
                 name="password"
                 render={({ field }) => (
                   <FormItem className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <FormLabel>Password</FormLabel>
-                      <Link to="/forgot-password" className="text-xs text-souschef-red hover:underline">
-                        Forgot password?
-                      </Link>
-                    </div>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="password" 
+                        placeholder="••••••••" 
+                        className="h-11"
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>Confirm Password</FormLabel>
                     <FormControl>
                       <Input 
                         {...field} 
@@ -116,12 +156,19 @@ const Login = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
+                    Creating account...
                   </>
                 ) : (
-                  'Sign In'
+                  'Create Account'
                 )}
               </Button>
+              
+              <p className="text-xs text-center text-gray-500">
+                By signing up, you agree to our{' '}
+                <Link to="/terms" className="text-souschef-red hover:underline">Terms of Service</Link>{' '}
+                and{' '}
+                <Link to="/privacy" className="text-souschef-red hover:underline">Privacy Policy</Link>.
+              </p>
             </form>
           </Form>
           
@@ -131,7 +178,7 @@ const Login = () => {
                 <Separator className="w-full" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-gray-500">Or continue with</span>
+                <span className="bg-white px-2 text-gray-500">Or sign up with</span>
               </div>
             </div>
             
@@ -146,9 +193,9 @@ const Login = () => {
           </div>
           
           <p className="text-center text-sm text-gray-600 mt-6">
-            Don't have an account?{' '}
-            <Link to="/signup" className="text-souschef-red font-medium hover:underline">
-              Sign up
+            Already have an account?{' '}
+            <Link to="/login" className="text-souschef-red font-medium hover:underline">
+              Sign in
             </Link>
           </p>
         </div>
@@ -157,4 +204,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;
