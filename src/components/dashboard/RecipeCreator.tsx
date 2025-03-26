@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -15,7 +14,6 @@ import {
   CuisineSelector, 
   type CuisineLevel 
 } from '@/components/dashboard/CuisineSelector';
-import { IngredientSelector } from '@/components/dashboard/IngredientSelector';
 import { MealTypeSelector } from '@/components/dashboard/MealTypeSelector';
 import { 
   Sparkles, 
@@ -47,15 +45,14 @@ interface GeneratedRecipe {
 
 type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
-interface MealTypeIngredients {
-  mealType: MealType;
-  ingredients: string[];
-}
-
 export function RecipeCreator() {
   const [selectedCuisine, setSelectedCuisine] = useState<CuisineLevel | null>(null);
-  const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
-  const [mealTypeIngredients, setMealTypeIngredients] = useState<MealTypeIngredients[]>([]);
+  const [mealTypeIngredients, setMealTypeIngredients] = useState<Record<MealType, string[]>>({
+    breakfast: [],
+    lunch: [],
+    dinner: [],
+    snack: []
+  });
   const [selectedMealTypes, setSelectedMealTypes] = useState<MealType[]>(['dinner']);
   const [recipeCount, setRecipeCount] = useState<number>(1);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
@@ -65,16 +62,6 @@ export function RecipeCreator() {
   const [showRecipeDialog, setShowRecipeDialog] = useState<boolean>(false);
   
   const { user } = useAuth();
-
-  const handleAddIngredient = (ingredient: string) => {
-    if (!selectedIngredients.includes(ingredient)) {
-      setSelectedIngredients([...selectedIngredients, ingredient]);
-    }
-  };
-
-  const handleRemoveIngredient = (ingredient: string) => {
-    setSelectedIngredients(selectedIngredients.filter(item => item !== ingredient));
-  };
 
   const handleToggleMealType = (mealType: MealType) => {
     setSelectedMealTypes(prev => {
@@ -90,35 +77,33 @@ export function RecipeCreator() {
     if (!ingredient.trim()) return;
     
     setMealTypeIngredients(prev => {
-      const existingEntry = prev.find(item => item.mealType === mealType);
-      
-      if (existingEntry) {
-        if (!existingEntry.ingredients.includes(ingredient)) {
-          return prev.map(item => 
-            item.mealType === mealType 
-              ? { ...item, ingredients: [...item.ingredients, ingredient] }
-              : item
-          );
-        }
-        return prev;
-      } else {
-        return [...prev, { mealType, ingredients: [ingredient] }];
+      // Only add if the ingredient isn't already in the list
+      if (!prev[mealType].includes(ingredient)) {
+        return {
+          ...prev,
+          [mealType]: [...prev[mealType], ingredient]
+        };
       }
+      return prev;
     });
+  };
 
-    // Also add to general ingredients list if not already there
-    if (!selectedIngredients.includes(ingredient)) {
-      setSelectedIngredients([...selectedIngredients, ingredient]);
-    }
+  const handleRemoveMealTypeIngredient = (mealType: MealType, ingredient: string) => {
+    setMealTypeIngredients(prev => ({
+      ...prev,
+      [mealType]: prev[mealType].filter(item => item !== ingredient)
+    }));
   };
 
   const getAllIngredients = () => {
-    const allIngredients = new Set(selectedIngredients);
-    mealTypeIngredients.forEach(item => {
-      item.ingredients.forEach(ingredient => {
+    const allIngredients = new Set<string>();
+    
+    Object.values(mealTypeIngredients).forEach(ingredients => {
+      ingredients.forEach(ingredient => {
         allIngredients.add(ingredient);
       });
     });
+    
     return Array.from(allIngredients);
   };
 
@@ -323,12 +308,8 @@ export function RecipeCreator() {
           selectedMealTypes={selectedMealTypes}
           onToggleMealType={handleToggleMealType}
           onAddIngredient={handleAddMealTypeIngredient}
-        />
-        
-        <IngredientSelector
-          selectedIngredients={selectedIngredients}
-          onAddIngredient={handleAddIngredient}
-          onRemoveIngredient={handleRemoveIngredient}
+          onRemoveIngredient={handleRemoveMealTypeIngredient}
+          mealTypeIngredients={mealTypeIngredients}
         />
         
         <div className="flex justify-end pt-4 border-t border-gray-200">
