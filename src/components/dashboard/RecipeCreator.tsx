@@ -34,6 +34,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { format } from 'date-fns';
 
 interface GeneratedRecipe {
   title: string;
@@ -46,10 +48,12 @@ interface GeneratedRecipe {
   image_url?: string;
 }
 
+type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
+
 export function RecipeCreator() {
   const [selectedCuisine, setSelectedCuisine] = useState<CuisineLevel | null>(null);
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
-  const [mealType, setMealType] = useState<string>('dinner');
+  const [selectedMealTypes, setSelectedMealTypes] = useState<MealType[]>(['dinner']);
   const [recipeCount, setRecipeCount] = useState<number>(1);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -70,9 +74,18 @@ export function RecipeCreator() {
     setSelectedIngredients(selectedIngredients.filter(item => item !== ingredient));
   };
 
+  const handleMealTypeChange = (value: string[]) => {
+    setSelectedMealTypes(value as MealType[]);
+  };
+
   const handleGenerateRecipes = async () => {
     if (!selectedCuisine) {
       toast.error("Please select a cuisine style first");
+      return;
+    }
+
+    if (selectedMealTypes.length === 0) {
+      toast.error("Please select at least one meal type");
       return;
     }
 
@@ -84,7 +97,7 @@ export function RecipeCreator() {
         body: {
           cuisineLevel: selectedCuisine,
           ingredients: selectedIngredients,
-          mealType,
+          mealType: selectedMealTypes.join(','),
           count: recipeCount
         }
       });
@@ -158,11 +171,14 @@ export function RecipeCreator() {
       setIsSaving(true);
       
       const recipe = generatedRecipes[selectedRecipeIndex];
+      const today = new Date();
       
       const response = await supabase.functions.invoke('save-recipe', {
         body: {
           recipe,
-          imageUrl: recipe.image_url
+          imageUrl: recipe.image_url,
+          mealType: selectedMealTypes[0],  // Use the first selected meal type
+          plannedDate: format(today, 'yyyy-MM-dd')  // Default to today
         }
       });
 
@@ -184,18 +200,18 @@ export function RecipeCreator() {
 
   const selectedRecipe = generatedRecipes[selectedRecipeIndex];
 
-  const getMealTypeIcon = (type: string) => {
+  const getMealTypeIcon = (type: MealType) => {
     switch (type) {
       case 'breakfast':
-        return <Coffee className="mr-2 h-4 w-4" />;
+        return <Coffee className="h-4 w-4" />;
       case 'lunch':
-        return <Utensils className="mr-2 h-4 w-4" />;
+        return <Utensils className="h-4 w-4" />;
       case 'dinner':
-        return <ChefHat className="mr-2 h-4 w-4" />;
+        return <ChefHat className="h-4 w-4" />;
       case 'snack':
-        return <Coffee className="mr-2 h-4 w-4" />;
+        return <Coffee className="h-4 w-4" />;
       default:
-        return <Utensils className="mr-2 h-4 w-4" />;
+        return <Utensils className="h-4 w-4" />;
     }
   };
 
@@ -221,37 +237,29 @@ export function RecipeCreator() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h2 className="text-xl font-semibold mb-4">Meal Type</h2>
-            <Select value={mealType} onValueChange={setMealType}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select meal type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="breakfast">
-                  <div className="flex items-center">
-                    <Coffee className="mr-2 h-4 w-4" />
-                    Breakfast
-                  </div>
-                </SelectItem>
-                <SelectItem value="lunch">
-                  <div className="flex items-center">
-                    <Utensils className="mr-2 h-4 w-4" />
-                    Lunch
-                  </div>
-                </SelectItem>
-                <SelectItem value="dinner">
-                  <div className="flex items-center">
-                    <ChefHat className="mr-2 h-4 w-4" />
-                    Dinner
-                  </div>
-                </SelectItem>
-                <SelectItem value="snack">
-                  <div className="flex items-center">
-                    <Coffee className="mr-2 h-4 w-4" />
-                    Snack
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            <ToggleGroup 
+              type="multiple" 
+              value={selectedMealTypes}
+              onValueChange={handleMealTypeChange}
+              className="flex flex-wrap justify-start gap-2"
+            >
+              <ToggleGroupItem value="breakfast" className="flex items-center gap-1 border border-gray-200">
+                <Coffee size={16} />
+                <span>Breakfast</span>
+              </ToggleGroupItem>
+              <ToggleGroupItem value="lunch" className="flex items-center gap-1 border border-gray-200">
+                <Utensils size={16} />
+                <span>Lunch</span>
+              </ToggleGroupItem>
+              <ToggleGroupItem value="dinner" className="flex items-center gap-1 border border-gray-200">
+                <ChefHat size={16} />
+                <span>Dinner</span>
+              </ToggleGroupItem>
+              <ToggleGroupItem value="snack" className="flex items-center gap-1 border border-gray-200">
+                <Coffee size={16} />
+                <span>Snack</span>
+              </ToggleGroupItem>
+            </ToggleGroup>
           </div>
           
           <div>
@@ -302,7 +310,7 @@ export function RecipeCreator() {
         <div className="flex justify-end pt-4 border-t border-gray-200">
           <Button 
             onClick={handleGenerateRecipes}
-            disabled={!selectedCuisine || isGenerating}
+            disabled={!selectedCuisine || selectedMealTypes.length === 0 || isGenerating}
             className="px-6 bg-souschef-red hover:bg-souschef-red-light text-white"
             size="lg"
           >
@@ -374,9 +382,11 @@ export function RecipeCreator() {
                     <Badge variant="outline" className="flex items-center gap-1.5">
                       <ChefHat size={14} /> {selectedRecipe.difficulty}
                     </Badge>
-                    <Badge variant="outline" className="flex items-center gap-1.5">
-                      {getMealTypeIcon(mealType)} {mealType}
-                    </Badge>
+                    {selectedMealTypes.map((mealType) => (
+                      <Badge key={mealType} variant="outline" className="flex items-center gap-1.5">
+                        {getMealTypeIcon(mealType)} {mealType}
+                      </Badge>
+                    ))}
                   </div>
 
                   {generatedRecipes.length > 1 && (

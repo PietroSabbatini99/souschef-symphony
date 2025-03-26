@@ -27,6 +27,10 @@ serve(async (req) => {
       throw new Error("Cuisine level is required");
     }
 
+    // Parse meal types if they come as a comma-separated string
+    const mealTypes = mealType.includes(',') ? mealType.split(',') : [mealType];
+    const primaryMealType = mealTypes[0];  // Use the first meal type as primary for prompting
+
     // Map cuisine level to style descriptions
     const cuisineStyleDescriptions = {
       street: "quick and casual street food style with bold flavors",
@@ -42,12 +46,14 @@ serve(async (req) => {
     }
 
     // Construct recipe generation prompt
-    const systemPrompt = `You are a professional chef specialized in creating ${styleDescription} recipes. Generate ${count > 1 ? count + ' different' : 'a'} ${mealType} recipe${count > 1 ? 's' : ''} ${promptIngredients}.
+    const systemPrompt = `You are a professional chef specialized in creating ${styleDescription} recipes. Generate ${count > 1 ? count + ' different' : 'a'} ${primaryMealType} recipe${count > 1 ? 's' : ''} ${promptIngredients}.
 
 For the recipe name:
 - If cuisine level is "street": Create a catchy, simple name
 - If cuisine level is "home": Create a straightforward, approachable name
 - If cuisine level is "gourmet": Create an elegant, sophisticated name
+
+If additional meal types are specified (${mealTypes.length > 1 ? mealTypes.slice(1).join(', ') : 'none'}), make sure the recipe is suitable for those meal types as well.
 
 For each recipe, provide the following JSON structure:
 {
@@ -72,7 +78,7 @@ For each recipe, provide the following JSON structure:
         model: 'gpt-4o',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Create ${count > 1 ? count + ' different' : 'a'} ${cuisineLevel} ${mealType} recipe${count > 1 ? 's' : ''} ${promptIngredients}.` }
+          { role: 'user', content: `Create ${count > 1 ? count + ' different' : 'a'} ${cuisineLevel} ${primaryMealType} recipe${count > 1 ? 's' : ''} ${promptIngredients}.` }
         ],
         temperature: 0.7,
       }),

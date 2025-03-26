@@ -36,7 +36,9 @@ serve(async (req) => {
     // Get the recipe data from the request
     const { 
       recipe,
-      imageUrl 
+      imageUrl,
+      mealType,
+      plannedDate
     } = await req.json();
 
     if (!recipe) {
@@ -49,10 +51,18 @@ serve(async (req) => {
       error: userError,
     } = await supabase.auth.getUser();
 
-    if (userError || !user) {
+    if (userError) {
+      console.error("User error:", userError);
       throw new Error('Authentication failed');
     }
+    
+    if (!user) {
+      console.error("No user found");
+      throw new Error('Authentication failed - no user found');
+    }
 
+    console.log("User authenticated:", user.id);
+    
     // Prepare the recipe data for insertion
     const recipeData = {
       title: recipe.title,
@@ -61,22 +71,52 @@ serve(async (req) => {
       instructions: recipe.instructions,
       cooking_time: recipe.cooking_time,
       difficulty: recipe.difficulty,
-      image_url: imageUrl,
+      image_url: imageUrl || recipe.image_url,
       user_id: user.id,
     };
 
+    console.log("Saving recipe:", recipeData.title);
+
     // Insert the recipe into the database
-    const { data, error } = await supabase
+    const { data: recipeData, error: recipeError } = await supabase
       .from('recipes')
       .insert(recipeData)
       .select()
       .single();
 
-    if (error) {
-      throw error;
+    if (recipeError) {
+      console.error("Recipe insert error:", recipeError);
+      throw recipeError;
     }
 
-    return new Response(JSON.stringify({ success: true, recipe: data }), {
+    console.log("Recipe saved successfully with ID:", recipeData.id);
+    
+    // If meal type and planned date are provided, create a meal plan entry
+    if (mealType && plannedDate) {
+      const mealPlanData = {
+        recipe_id: recipeData.id,
+        user_id: user.id,
+        meal_type: mealType,
+        planned_date: plannedDate
+      };
+
+      console.log("Creating meal plan:", mealPlanData);
+
+      const { data: mealPlanResult, error: mealPlanError } = await supabase
+        .from('meal_plans')
+        .insert(mealPlanData)
+        .select()
+        .single();
+
+      if (mealPlanError) {
+        console.error("Meal plan insert error:", mealPlanError);
+        // Don't throw, just log the error since the recipe was saved successfully
+      } else {
+        console.log("Meal plan created successfully:", mealPlanResult);
+      }
+    }
+
+    return new Response(JSON.stringify({ success: true, recipe: recipeData }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {

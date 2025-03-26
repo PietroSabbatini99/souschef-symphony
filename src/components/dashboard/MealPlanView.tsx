@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Calendar as CalendarIcon, 
@@ -16,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { Json } from '@/integrations/supabase/types';
 
 interface MealPlanViewProps {
   selectedDate: Date;
@@ -34,7 +34,7 @@ interface MealPlan {
     image_url: string;
     cooking_time: number;
     difficulty: string;
-    ingredients: Record<string, any>;
+    ingredients: Json;
   };
 }
 
@@ -49,7 +49,6 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // For demonstration purposes, we'll show the week around the selected date
   const getDaysInWeek = () => {
     const day = selectedDate.getDay();
     const startDate = new Date(selectedDate);
@@ -132,7 +131,6 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
   }, [selectedDate]);
 
   const handleAddMeal = () => {
-    // Will be implemented in future
     toast.info('Meal plan creation will be added in the next phase!');
   };
   
@@ -145,7 +143,7 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
     }
   };
 
-  const getIngredientsList = (ingredients: Record<string, any>): string[] => {
+  const getIngredientsList = (ingredients: Json): string[] => {
     if (!ingredients) return [];
     
     try {
@@ -154,14 +152,19 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
         return Array.isArray(parsed) ? parsed : Object.keys(parsed);
       }
       
-      return Array.isArray(ingredients) ? ingredients : Object.keys(ingredients);
+      if (Array.isArray(ingredients)) {
+        return ingredients;
+      } else if (typeof ingredients === 'object') {
+        return Object.keys(ingredients);
+      }
+      
+      return [];
     } catch (e) {
       console.error('Error parsing ingredients:', e);
       return [];
     }
   };
   
-  // Sample data for demonstration
   const sampleMeals = [
     {
       id: 1,
@@ -238,7 +241,6 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
         </div>
       </div>
       
-      {/* Date selector */}
       <div className="grid grid-cols-7 gap-1 mb-8">
         {weekDays.map((date, index) => (
           <button
