@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Hero } from '@/components/landing/Hero';
@@ -6,6 +5,7 @@ import { Features } from '@/components/landing/Features';
 import { Button } from '@/components/ui/button';
 import { ChefHat, Calendar, Utensils, Sparkles, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Logo } from '@/components/ui/logo';
 
 const Index = () => {
   return (
