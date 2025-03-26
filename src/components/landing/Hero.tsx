@@ -29,10 +29,10 @@ export function Hero() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 mb-16 w-full sm:w-auto animate-fade-up" style={{ animationDelay: '300ms' }}>
-            <Button asChild size="lg" className="bg-souschef-red hover:bg-souschef-red-light text-white btn-hover">
+            <Button asChild size="lg" className="bg-souschef-red hover:bg-souschef-red-light text-white">
               <Link to="/signup">Get Started Free</Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="group btn-hover">
+            <Button asChild size="lg" variant="outline" className="group">
               <Link to="/features" className="flex items-center">
                 View Features
                 <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />

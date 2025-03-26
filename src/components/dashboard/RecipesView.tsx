@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, Search } from 'lucide-react';
+import { PlusCircle, Search, ChefHat } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { RecipeCard } from './RecipeCard';
@@ -16,7 +16,7 @@ interface Recipe {
   image_url: string;
   cooking_time: number;
   difficulty: string;
-  ingredients: Record<string, any>;
+  ingredients: Record<string, any> | string | any[];
   created_at: string;
 }
 
@@ -38,7 +38,9 @@ export function RecipesView() {
           
         if (error) throw error;
         
-        setRecipes(data || []);
+        // Handle data with proper typing
+        const typedData = data as Recipe[];
+        setRecipes(typedData || []);
       } catch (error) {
         console.error('Error fetching recipes:', error);
         toast.error('Failed to load recipes');
@@ -71,7 +73,7 @@ export function RecipesView() {
     }
   };
 
-  const getIngredientsList = (ingredients: Record<string, any>): string[] => {
+  const getIngredientsList = (ingredients: Record<string, any> | string | any[]): string[] => {
     if (!ingredients) return [];
     
     try {
