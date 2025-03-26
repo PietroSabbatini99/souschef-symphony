@@ -1,26 +1,45 @@
 
 import React from 'react';
-import { ChefHat, Clock, Bookmark, Share2 } from 'lucide-react';
+import { ChefHat, Clock, Bookmark, Trash2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface RecipeCardProps {
+  id: string;
   title: string;
   description: string;
   imageUrl: string;
   cookingTime: string;
   level: 'street' | 'home' | 'gourmet';
   ingredients: string[];
+  onDeleted?: () => void;
+  onView?: (id: string) => void;
 }
 
 export function RecipeCard({
+  id,
   title,
   description,
   imageUrl,
   cookingTime,
   level,
-  ingredients
+  ingredients,
+  onDeleted,
+  onView
 }: RecipeCardProps) {
   const levelLabel = {
     street: 'Street Food',
@@ -32,6 +51,31 @@ export function RecipeCard({
     street: <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Street Food</Badge>,
     home: <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Home Cooking</Badge>,
     gourmet: <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">Gourmet</Badge>
+  };
+
+  const handleDelete = async () => {
+    try {
+      const { error } = await supabase
+        .from('recipes')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      toast.success('Recipe deleted successfully');
+      if (onDeleted) {
+        onDeleted();
+      }
+    } catch (error) {
+      console.error('Error deleting recipe:', error);
+      toast.error('Failed to delete recipe');
+    }
+  };
+
+  const handleView = () => {
+    if (onView) {
+      onView(id);
+    }
   };
 
   return (
@@ -56,9 +100,35 @@ export function RecipeCard({
               <span>{cookingTime}</span>
             </div>
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500">
-            <Bookmark size={18} />
-          </Button>
+          <div className="flex space-x-1">
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500">
+              <Bookmark size={18} />
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-red-500">
+                  <Trash2 size={18} />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Recipe</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this recipe? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleDelete}
+                    className="bg-red-500 text-white hover:bg-red-600"
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
       </CardHeader>
 
@@ -83,7 +153,11 @@ export function RecipeCard({
       </CardContent>
 
       <CardFooter className="pt-0 flex justify-between">
-        <Button size="sm" className="bg-souschef-red hover:bg-souschef-red-light text-white w-full">
+        <Button 
+          size="sm" 
+          className="bg-souschef-red hover:bg-souschef-red-light text-white w-full"
+          onClick={handleView}
+        >
           View Recipe
         </Button>
       </CardFooter>
