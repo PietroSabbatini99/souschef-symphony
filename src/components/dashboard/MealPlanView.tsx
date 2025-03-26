@@ -1,18 +1,41 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  Calendar, 
+  Calendar as CalendarIcon, 
   Clock, 
   ChevronLeft, 
   ChevronRight,
-  PlusCircle 
+  PlusCircle,
+  Calendar as CalendarComponent
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RecipeCard } from './RecipeCard';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 
 interface MealPlanViewProps {
   selectedDate: Date;
   onDateChange: (date: Date) => void;
+}
+
+interface MealPlan {
+  id: string;
+  recipe_id: string;
+  planned_date: string;
+  meal_type: string;
+  recipe: {
+    id: string;
+    title: string;
+    description: string;
+    image_url: string;
+    cooking_time: number;
+    difficulty: string;
+    ingredients: Record<string, any>;
+  };
 }
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -22,36 +45,9 @@ const MONTHS = [
 ];
 
 export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) {
-  // Sample data - this would come from an API in the real app
-  const meals = [
-    {
-      id: 1,
-      title: "Spicy Chicken Tacos",
-      description: "Street-style tacos with marinated chicken, fresh lime, and homemade salsa.",
-      imageUrl: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?q=80&w=1080&auto=format&fit=crop",
-      cookingTime: "25 mins",
-      level: "street",
-      ingredients: ["Chicken", "Tortillas", "Onion", "Cilantro", "Lime"]
-    },
-    {
-      id: 2,
-      title: "Creamy Garlic Parmesan Pasta",
-      description: "Simple but delicious pasta with a creamy garlic parmesan sauce.",
-      imageUrl: "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?q=80&w=1080&auto=format&fit=crop",
-      cookingTime: "20 mins",
-      level: "home",
-      ingredients: ["Pasta", "Parmesan", "Garlic", "Cream", "Butter"]
-    },
-    {
-      id: 3,
-      title: "Pan-Seared Salmon with Lemon Butter",
-      description: "Elegant salmon dish with a delicate lemon butter sauce and fresh herbs.",
-      imageUrl: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=1080&auto=format&fit=crop",
-      cookingTime: "30 mins",
-      level: "gourmet",
-      ingredients: ["Salmon", "Lemon", "Butter", "Herbs", "White Wine"]
-    }
-  ];
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // For demonstration purposes, we'll show the week around the selected date
   const getDaysInWeek = () => {
@@ -94,6 +90,107 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
     newDate.setDate(selectedDate.getDate() + 7);
     onDateChange(newDate);
   };
+
+  useEffect(() => {
+    async function fetchMealPlans() {
+      try {
+        setLoading(true);
+        
+        const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+        
+        const { data, error } = await supabase
+          .from('meal_plans')
+          .select(`
+            id,
+            recipe_id,
+            planned_date,
+            meal_type,
+            recipe:recipes(
+              id,
+              title,
+              description,
+              image_url,
+              cooking_time,
+              difficulty,
+              ingredients
+            )
+          `)
+          .eq('planned_date', formattedDate);
+          
+        if (error) throw error;
+        
+        setMealPlans(data || []);
+      } catch (error) {
+        console.error('Error fetching meal plans:', error);
+        toast.error('Failed to load meal plans');
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchMealPlans();
+  }, [selectedDate]);
+
+  const handleAddMeal = () => {
+    // Will be implemented in future
+    toast.info('Meal plan creation will be added in the next phase!');
+  };
+  
+  const getDifficultyLevel = (difficulty: string): 'street' | 'home' | 'gourmet' => {
+    switch (difficulty) {
+      case 'easy': return 'street';
+      case 'medium': return 'home';
+      case 'hard': return 'gourmet';
+      default: return 'home';
+    }
+  };
+
+  const getIngredientsList = (ingredients: Record<string, any>): string[] => {
+    if (!ingredients) return [];
+    
+    try {
+      if (typeof ingredients === 'string') {
+        const parsed = JSON.parse(ingredients);
+        return Array.isArray(parsed) ? parsed : Object.keys(parsed);
+      }
+      
+      return Array.isArray(ingredients) ? ingredients : Object.keys(ingredients);
+    } catch (e) {
+      console.error('Error parsing ingredients:', e);
+      return [];
+    }
+  };
+  
+  // Sample data for demonstration
+  const sampleMeals = [
+    {
+      id: 1,
+      title: "Spicy Chicken Tacos",
+      description: "Street-style tacos with marinated chicken, fresh lime, and homemade salsa.",
+      imageUrl: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?q=80&w=1080&auto=format&fit=crop",
+      cookingTime: "25 mins",
+      level: "street",
+      ingredients: ["Chicken", "Tortillas", "Onion", "Cilantro", "Lime"]
+    },
+    {
+      id: 2,
+      title: "Creamy Garlic Parmesan Pasta",
+      description: "Simple but delicious pasta with a creamy garlic parmesan sauce.",
+      imageUrl: "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?q=80&w=1080&auto=format&fit=crop",
+      cookingTime: "20 mins",
+      level: "home",
+      ingredients: ["Pasta", "Parmesan", "Garlic", "Cream", "Butter"]
+    },
+    {
+      id: 3,
+      title: "Pan-Seared Salmon with Lemon Butter",
+      description: "Elegant salmon dish with a delicate lemon butter sauce and fresh herbs.",
+      imageUrl: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=1080&auto=format&fit=crop",
+      cookingTime: "30 mins",
+      level: "gourmet",
+      ingredients: ["Salmon", "Lemon", "Butter", "Herbs", "White Wine"]
+    }
+  ];
   
   return (
     <div className="w-full">
@@ -108,12 +205,32 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
             <ChevronLeft size={18} />
           </Button>
           
-          <div className="flex items-center mx-2 px-3 py-1.5 rounded-lg bg-gray-100">
-            <Calendar size={16} className="mr-2 text-gray-500" />
-            <span className="font-medium">
-              {MONTHS[selectedDate.getMonth()]} {selectedDate.getFullYear()}
-            </span>
-          </div>
+          <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="mx-2 px-3 py-1.5"
+              >
+                <CalendarIcon size={16} className="mr-2 text-gray-500" />
+                <span className="font-medium">
+                  {format(selectedDate, 'MMMM yyyy')}
+                </span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="center">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => {
+                  if (date) {
+                    onDateChange(date);
+                    setIsCalendarOpen(false);
+                  }
+                }}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
           
           <Button variant="outline" size="icon" onClick={nextWeek}>
             <ChevronRight size={18} />
@@ -149,27 +266,54 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
       
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-xl font-semibold">
-          Today's Meals
+          {format(selectedDate, 'EEEE, MMMM d')} Meals
         </h3>
-        <Button variant="outline" size="sm" className="gap-1">
+        <Button variant="outline" size="sm" className="gap-1" onClick={handleAddMeal}>
           <PlusCircle size={16} />
           Add Meal
         </Button>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {meals.map((meal) => (
-          <RecipeCard
-            key={meal.id}
-            title={meal.title}
-            description={meal.description}
-            imageUrl={meal.imageUrl}
-            cookingTime={meal.cookingTime}
-            level={meal.level as 'street' | 'home' | 'gourmet'}
-            ingredients={meal.ingredients}
-          />
-        ))}
-      </div>
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-lg overflow-hidden border border-gray-200">
+              <Skeleton className="w-full h-48" />
+              <div className="p-4">
+                <Skeleton className="w-2/3 h-6 mb-2" />
+                <Skeleton className="w-full h-4 mb-1" />
+                <Skeleton className="w-full h-4 mb-4" />
+                <Skeleton className="w-1/3 h-4 mb-2" />
+                <Skeleton className="w-full h-8 mt-4" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : mealPlans.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {mealPlans.map((mealPlan) => (
+            <RecipeCard
+              key={mealPlan.id}
+              title={`${mealPlan.meal_type.charAt(0).toUpperCase() + mealPlan.meal_type.slice(1)}: ${mealPlan.recipe.title}`}
+              description={mealPlan.recipe.description || ''}
+              imageUrl={mealPlan.recipe.image_url || 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?q=80&w=1080&auto=format&fit=crop'}
+              cookingTime={mealPlan.recipe.cooking_time ? `${mealPlan.recipe.cooking_time} mins` : '30 mins'}
+              level={getDifficultyLevel(mealPlan.recipe.difficulty)}
+              ingredients={getIngredientsList(mealPlan.recipe.ingredients)}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-lg">
+          <CalendarComponent size={48} className="mx-auto text-gray-300 mb-3" />
+          <h3 className="text-xl font-semibold text-gray-600 mb-2">No meals planned</h3>
+          <p className="text-gray-500 mb-6">Add meals to your calendar for this day</p>
+          <Button onClick={handleAddMeal} className="bg-souschef-red hover:bg-souschef-red-light text-white">
+            <PlusCircle size={18} className="mr-2" />
+            Add Meal Plan
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

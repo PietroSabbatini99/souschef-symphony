@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
 import { 
@@ -8,6 +8,8 @@ import {
 } from '@/components/dashboard/CuisineSelector';
 import { IngredientSelector } from '@/components/dashboard/IngredientSelector';
 import { MealPlanView } from '@/components/dashboard/MealPlanView';
+import { RecipesView } from '@/components/dashboard/RecipesView';
+import { AnalyticsView } from '@/components/dashboard/AnalyticsView';
 import { 
   Calendar, 
   Settings, 
@@ -16,16 +18,20 @@ import {
   Home, 
   User,
   MessageSquare,
-  Sparkles
+  Sparkles,
+  BarChart
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const Dashboard = () => {
   const [selectedCuisine, setSelectedCuisine] = useState<CuisineLevel | null>(null);
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [activeTab, setActiveTab] = useState<'plan' | 'create'>('plan');
+  const [activeTab, setActiveTab] = useState<'calendar' | 'recipes' | 'create' | 'analytics'>('calendar');
+  const [isLoading, setIsLoading] = useState(false);
   const { signOut, user } = useAuth();
 
   const handleAddIngredient = (ingredient: string) => {
@@ -38,12 +44,23 @@ const Dashboard = () => {
     setSelectedIngredients(selectedIngredients.filter(item => item !== ingredient));
   };
 
-  const handleGenerateRecipe = () => {
-    // This will be implemented when we add AI integration
-    console.log({
-      cuisineLevel: selectedCuisine,
-      ingredients: selectedIngredients
-    });
+  const handleGenerateRecipe = async () => {
+    if (!selectedCuisine) return;
+    
+    setIsLoading(true);
+    try {
+      // This will be implemented when we add AI integration
+      toast.success("Recipe generation will be implemented in the next phase!");
+      console.log({
+        cuisineLevel: selectedCuisine,
+        ingredients: selectedIngredients
+      });
+    } catch (error) {
+      console.error('Error generating recipe:', error);
+      toast.error('Failed to generate recipe');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -57,21 +74,21 @@ const Dashboard = () => {
         <nav className="flex-1">
           <div className="mb-2 text-xs font-medium text-gray-500">MENU</div>
           <div className="space-y-1">
-            <NavButton active={activeTab === 'plan'} onClick={() => setActiveTab('plan')}>
+            <NavButton active={activeTab === 'calendar'} onClick={() => setActiveTab('calendar')}>
               <Calendar size={20} />
-              <span>Meal Plan</span>
+              <span>Meal Calendar</span>
+            </NavButton>
+            <NavButton active={activeTab === 'recipes'} onClick={() => setActiveTab('recipes')}>
+              <Home size={20} />
+              <span>My Recipes</span>
             </NavButton>
             <NavButton active={activeTab === 'create'} onClick={() => setActiveTab('create')}>
               <ChefHat size={20} />
               <span>Create Recipe</span>
             </NavButton>
-            <NavButton>
-              <Home size={20} />
-              <span>Recipes</span>
-            </NavButton>
-            <NavButton>
-              <User size={20} />
-              <span>Profile</span>
+            <NavButton active={activeTab === 'analytics'} onClick={() => setActiveTab('analytics')}>
+              <BarChart size={20} />
+              <span>Analytics</span>
             </NavButton>
           </div>
         </nav>
@@ -100,12 +117,31 @@ const Dashboard = () => {
           </div>
           
           <div className="flex md:hidden gap-2">
-            <Button variant="ghost" size="sm" className={activeTab === 'plan' ? 'bg-gray-100' : ''} onClick={() => setActiveTab('plan')}>
-              <Calendar size={18} className="mr-1.5" />
-              Plan
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={activeTab === 'calendar' ? 'bg-gray-100' : ''} 
+              onClick={() => setActiveTab('calendar')}
+            >
+              <Calendar size={18} className="mr-1" />
+              Calendar
             </Button>
-            <Button variant="ghost" size="sm" className={activeTab === 'create' ? 'bg-gray-100' : ''} onClick={() => setActiveTab('create')}>
-              <ChefHat size={18} className="mr-1.5" />
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={activeTab === 'recipes' ? 'bg-gray-100' : ''} 
+              onClick={() => setActiveTab('recipes')}
+            >
+              <Home size={18} className="mr-1" />
+              Recipes
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={activeTab === 'create' ? 'bg-gray-100' : ''} 
+              onClick={() => setActiveTab('create')}
+            >
+              <ChefHat size={18} className="mr-1" />
               Create
             </Button>
           </div>
@@ -121,12 +157,18 @@ const Dashboard = () => {
         </header>
         
         <main className="flex-1 p-4 md:p-6 overflow-auto">
-          {activeTab === 'plan' ? (
+          {activeTab === 'calendar' && (
             <MealPlanView 
               selectedDate={selectedDate}
               onDateChange={setSelectedDate}
             />
-          ) : (
+          )}
+          
+          {activeTab === 'recipes' && (
+            <RecipesView />
+          )}
+          
+          {activeTab === 'create' && (
             <div className="max-w-4xl mx-auto">
               <div className="flex items-start justify-between mb-6">
                 <div>
@@ -154,16 +196,29 @@ const Dashboard = () => {
                 <div className="flex justify-end pt-4 border-t border-gray-200">
                   <Button 
                     onClick={handleGenerateRecipe}
-                    disabled={!selectedCuisine}
+                    disabled={!selectedCuisine || isLoading}
                     className="px-6 bg-souschef-red hover:bg-souschef-red-light text-white btn-hover"
                     size="lg"
                   >
-                    <Sparkles size={18} className="mr-2" />
-                    Generate Recipe
+                    {isLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles size={18} className="mr-2" />
+                        Generate Recipe
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
             </div>
+          )}
+          
+          {activeTab === 'analytics' && (
+            <AnalyticsView />
           )}
         </main>
       </div>
