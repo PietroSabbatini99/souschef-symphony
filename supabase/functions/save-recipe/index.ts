@@ -64,7 +64,7 @@ serve(async (req) => {
     console.log("User authenticated:", user.id);
     
     // Prepare the recipe data for insertion
-    const recipeData = {
+    const recipeInsertData = {
       title: recipe.title,
       description: recipe.description,
       ingredients: recipe.ingredients,
@@ -75,12 +75,12 @@ serve(async (req) => {
       user_id: user.id,
     };
 
-    console.log("Saving recipe:", recipeData.title);
+    console.log("Saving recipe:", recipeInsertData.title);
 
     // Insert the recipe into the database
-    const { data: recipeData, error: recipeError } = await supabase
+    const { data: savedRecipe, error: recipeError } = await supabase
       .from('recipes')
-      .insert(recipeData)
+      .insert(recipeInsertData)
       .select()
       .single();
 
@@ -89,34 +89,49 @@ serve(async (req) => {
       throw recipeError;
     }
 
-    console.log("Recipe saved successfully with ID:", recipeData.id);
+    console.log("Recipe saved successfully with ID:", savedRecipe.id);
     
     // If meal type and planned date are provided, create a meal plan entry
     if (mealType && plannedDate) {
-      const mealPlanData = {
-        recipe_id: recipeData.id,
-        user_id: user.id,
-        meal_type: mealType,
-        planned_date: plannedDate
-      };
-
-      console.log("Creating meal plan:", mealPlanData);
-
-      const { data: mealPlanResult, error: mealPlanError } = await supabase
-        .from('meal_plans')
-        .insert(mealPlanData)
-        .select()
-        .single();
-
-      if (mealPlanError) {
-        console.error("Meal plan insert error:", mealPlanError);
-        // Don't throw, just log the error since the recipe was saved successfully
+      // If the meal type is an array, create a meal plan entry for each type
+      const mealTypes = Array.isArray(mealType) ? mealType : [mealType];
+      
+      console.log("Creating meal plans for types:", mealTypes);
+      
+      const mealPlanPromises = mealTypes.map(async (type) => {
+        const mealPlanData = {
+          recipe_id: savedRecipe.id,
+          user_id: user.id,
+          meal_type: type,
+          planned_date: plannedDate
+        };
+        
+        console.log("Creating meal plan for type:", type);
+        
+        return supabase
+          .from('meal_plans')
+          .insert(mealPlanData)
+          .select()
+          .single();
+      });
+      
+      // Wait for all meal plan entries to be created
+      const mealPlanResults = await Promise.all(mealPlanPromises);
+      
+      // Check for errors in creating meal plans
+      const mealPlanErrors = mealPlanResults
+        .filter(result => result.error)
+        .map(result => result.error);
+        
+      if (mealPlanErrors.length > 0) {
+        console.error("Meal plan insert errors:", mealPlanErrors);
+        // Log errors but don't throw since the recipe was saved successfully
       } else {
-        console.log("Meal plan created successfully:", mealPlanResult);
+        console.log("All meal plans created successfully");
       }
     }
 
-    return new Response(JSON.stringify({ success: true, recipe: recipeData }), {
+    return new Response(JSON.stringify({ success: true, recipe: savedRecipe }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {

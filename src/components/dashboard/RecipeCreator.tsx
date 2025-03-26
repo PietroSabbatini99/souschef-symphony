@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -173,12 +172,14 @@ export function RecipeCreator() {
       const recipe = generatedRecipes[selectedRecipeIndex];
       const today = new Date();
       
+      console.log("Saving recipe with meal types:", selectedMealTypes);
+      
       const response = await supabase.functions.invoke('save-recipe', {
         body: {
           recipe,
           imageUrl: recipe.image_url,
-          mealType: selectedMealTypes[0],  // Use the first selected meal type
-          plannedDate: format(today, 'yyyy-MM-dd')  // Default to today
+          mealType: selectedMealTypes,
+          plannedDate: format(today, 'yyyy-MM-dd')
         }
       });
 

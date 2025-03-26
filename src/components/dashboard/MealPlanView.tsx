@@ -153,7 +153,7 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
       }
       
       if (Array.isArray(ingredients)) {
-        return ingredients;
+        return ingredients.map(item => String(item));
       } else if (typeof ingredients === 'object') {
         return Object.keys(ingredients);
       }
@@ -164,36 +164,6 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
       return [];
     }
   };
-  
-  const sampleMeals = [
-    {
-      id: 1,
-      title: "Spicy Chicken Tacos",
-      description: "Street-style tacos with marinated chicken, fresh lime, and homemade salsa.",
-      imageUrl: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?q=80&w=1080&auto=format&fit=crop",
-      cookingTime: "25 mins",
-      level: "street",
-      ingredients: ["Chicken", "Tortillas", "Onion", "Cilantro", "Lime"]
-    },
-    {
-      id: 2,
-      title: "Creamy Garlic Parmesan Pasta",
-      description: "Simple but delicious pasta with a creamy garlic parmesan sauce.",
-      imageUrl: "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?q=80&w=1080&auto=format&fit=crop",
-      cookingTime: "20 mins",
-      level: "home",
-      ingredients: ["Pasta", "Parmesan", "Garlic", "Cream", "Butter"]
-    },
-    {
-      id: 3,
-      title: "Pan-Seared Salmon with Lemon Butter",
-      description: "Elegant salmon dish with a delicate lemon butter sauce and fresh herbs.",
-      imageUrl: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=1080&auto=format&fit=crop",
-      cookingTime: "30 mins",
-      level: "gourmet",
-      ingredients: ["Salmon", "Lemon", "Butter", "Herbs", "White Wine"]
-    }
-  ];
   
   return (
     <div className="w-full">
