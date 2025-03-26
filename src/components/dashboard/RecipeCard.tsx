@@ -55,6 +55,25 @@ export function RecipeCard({
 
   const handleDelete = async () => {
     try {
+      // First check if recipe is used in meal plans
+      const { data: mealPlans, error: mealPlanError } = await supabase
+        .from('meal_plans')
+        .select('id')
+        .eq('recipe_id', id);
+      
+      if (mealPlanError) throw mealPlanError;
+      
+      // If recipe is used in meal plans, delete those first
+      if (mealPlans && mealPlans.length > 0) {
+        const { error: deleteMealPlanError } = await supabase
+          .from('meal_plans')
+          .delete()
+          .eq('recipe_id', id);
+        
+        if (deleteMealPlanError) throw deleteMealPlanError;
+      }
+      
+      // Now delete the recipe
       const { error } = await supabase
         .from('recipes')
         .delete()
@@ -104,30 +123,33 @@ export function RecipeCard({
             <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500">
               <Bookmark size={18} />
             </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-red-500">
-                  <Trash2 size={18} />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Recipe</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to delete this recipe? This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction 
-                    onClick={handleDelete}
-                    className="bg-red-500 text-white hover:bg-red-600"
-                  >
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            {onDeleted && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-red-500">
+                    <Trash2 size={18} />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Recipe</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete this recipe? This action cannot be undone.
+                      {/* Add warning about meal plans if you want */}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction 
+                      onClick={handleDelete}
+                      className="bg-red-500 text-white hover:bg-red-600"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </div>
         </div>
       </CardHeader>

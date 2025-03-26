@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, Search, ChefHat, ArrowLeft } from 'lucide-react';
+import { PlusCircle, Search, ChefHat, ArrowLeft, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { RecipeCard } from './RecipeCard';
@@ -47,7 +46,6 @@ export function RecipesView() {
 
       if (error) throw error;
 
-      // Handle data with proper typing
       const typedData = data as Recipe[];
       setRecipes(typedData || []);
     } catch (error) {
@@ -70,7 +68,6 @@ export function RecipesView() {
     : recipes;
 
   const handleCreateRecipe = () => {
-    // Will be implemented in future
     toast.info('Recipe creation form will be added in the next phase!');
   };
 
@@ -126,7 +123,6 @@ export function RecipesView() {
     }
   };
 
-  // Render detailed recipe view
   if (viewingRecipe) {
     return (
       <div className="w-full">
@@ -220,7 +216,6 @@ export function RecipesView() {
     );
   }
 
-  // Render recipes list
   return (
     <div className="w-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Calendar as CalendarIcon, 
@@ -266,6 +267,7 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
           {mealPlans.map((mealPlan) => (
             <RecipeCard
               key={mealPlan.id}
+              id={mealPlan.recipe.id}
               title={`${mealPlan.meal_type.charAt(0).toUpperCase() + mealPlan.meal_type.slice(1)}: ${mealPlan.recipe.title}`}
               description={mealPlan.recipe.description || ''}
               imageUrl={mealPlan.recipe.image_url || 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?q=80&w=1080&auto=format&fit=crop'}
