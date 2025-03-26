@@ -22,7 +22,6 @@ import {
   Clock, 
   ChefHat, 
   Save, 
-  Image as ImageIcon, 
   Calendar,
   Coffee,
   Utensils,
@@ -132,18 +131,56 @@ export function RecipeCreator() {
       const recipe = generatedRecipes[selectedRecipeIndex];
       const today = new Date();
       
-      console.log("Saving recipe with meal types:", selectedMealTypes);
-      
-      const response = await supabase.functions.invoke('save-recipe', {
-        body: {
-          recipe,
-          mealType: selectedMealTypes,
-          plannedDate: format(today, 'yyyy-MM-dd')
-        }
+      // Save recipe directly to the database instead of using the edge function
+      // 1. Save the recipe
+      const { data: savedRecipe, error: recipeError } = await supabase
+        .from('recipes')
+        .insert({
+          title: recipe.title,
+          description: recipe.description,
+          ingredients: recipe.ingredients,
+          instructions: recipe.instructions,
+          cooking_time: recipe.cooking_time,
+          difficulty: recipe.difficulty,
+          image_url: recipe.image_url || null,
+          user_id: user.id
+        })
+        .select()
+        .single();
+
+      if (recipeError) {
+        throw new Error(`Failed to save recipe: ${recipeError.message}`);
+      }
+
+      // 2. Create meal plan entries for each selected meal type
+      const mealPlansPromises = selectedMealTypes.map(mealType => {
+        return supabase
+          .from('meal_plans')
+          .insert({
+            recipe_id: savedRecipe.id,
+            user_id: user.id,
+            meal_type: mealType,
+            planned_date: format(today, 'yyyy-MM-dd')
+          });
       });
 
-      if (response.error) {
-        throw new Error(response.error.message);
+      // Wait for all meal plan entries to be created
+      const mealPlanResults = await Promise.allSettled(mealPlansPromises);
+      
+      // Check for errors in creating meal plans
+      const mealPlanErrors = mealPlanResults
+        .filter(result => result.status === 'rejected' || (result.status === 'fulfilled' && result.value.error))
+        .map(result => {
+          if (result.status === 'rejected') {
+            return result.reason;
+          } else {
+            return (result as PromiseFulfilledResult<{error: any}>).value.error;
+          }
+        });
+        
+      if (mealPlanErrors.length > 0) {
+        console.error("Meal plan insert errors:", mealPlanErrors);
+        // Log errors but don't throw since the recipe was saved successfully
       }
 
       toast.success("Recipe saved successfully!");
