@@ -16,6 +16,7 @@ import {
   type CuisineLevel 
 } from '@/components/dashboard/CuisineSelector';
 import { IngredientSelector } from '@/components/dashboard/IngredientSelector';
+import { MealTypeSelector } from '@/components/dashboard/MealTypeSelector';
 import { 
   Sparkles, 
   Check, 
@@ -31,7 +32,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { format } from 'date-fns';
 
 interface GeneratedRecipe {
@@ -47,9 +47,15 @@ interface GeneratedRecipe {
 
 type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
+interface MealTypeIngredients {
+  mealType: MealType;
+  ingredients: string[];
+}
+
 export function RecipeCreator() {
   const [selectedCuisine, setSelectedCuisine] = useState<CuisineLevel | null>(null);
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
+  const [mealTypeIngredients, setMealTypeIngredients] = useState<MealTypeIngredients[]>([]);
   const [selectedMealTypes, setSelectedMealTypes] = useState<MealType[]>(['dinner']);
   const [recipeCount, setRecipeCount] = useState<number>(1);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
@@ -70,8 +76,50 @@ export function RecipeCreator() {
     setSelectedIngredients(selectedIngredients.filter(item => item !== ingredient));
   };
 
-  const handleMealTypeChange = (value: string[]) => {
-    setSelectedMealTypes(value as MealType[]);
+  const handleToggleMealType = (mealType: MealType) => {
+    setSelectedMealTypes(prev => {
+      if (prev.includes(mealType)) {
+        return prev.filter(type => type !== mealType);
+      } else {
+        return [...prev, mealType];
+      }
+    });
+  };
+
+  const handleAddMealTypeIngredient = (mealType: MealType, ingredient: string) => {
+    if (!ingredient.trim()) return;
+    
+    setMealTypeIngredients(prev => {
+      const existingEntry = prev.find(item => item.mealType === mealType);
+      
+      if (existingEntry) {
+        if (!existingEntry.ingredients.includes(ingredient)) {
+          return prev.map(item => 
+            item.mealType === mealType 
+              ? { ...item, ingredients: [...item.ingredients, ingredient] }
+              : item
+          );
+        }
+        return prev;
+      } else {
+        return [...prev, { mealType, ingredients: [ingredient] }];
+      }
+    });
+
+    // Also add to general ingredients list if not already there
+    if (!selectedIngredients.includes(ingredient)) {
+      setSelectedIngredients([...selectedIngredients, ingredient]);
+    }
+  };
+
+  const getAllIngredients = () => {
+    const allIngredients = new Set(selectedIngredients);
+    mealTypeIngredients.forEach(item => {
+      item.ingredients.forEach(ingredient => {
+        allIngredients.add(ingredient);
+      });
+    });
+    return Array.from(allIngredients);
   };
 
   const handleGenerateRecipes = async () => {
@@ -92,7 +140,7 @@ export function RecipeCreator() {
       const response = await supabase.functions.invoke('generate-recipe', {
         body: {
           cuisineLevel: selectedCuisine,
-          ingredients: selectedIngredients,
+          ingredients: getAllIngredients(),
           mealType: selectedMealTypes.join(','),
           count: recipeCount
         }
@@ -231,34 +279,7 @@ export function RecipeCreator() {
           onSelect={setSelectedCuisine}
         />
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Meal Type</h2>
-            <ToggleGroup 
-              type="multiple" 
-              value={selectedMealTypes}
-              onValueChange={handleMealTypeChange}
-              className="flex flex-wrap justify-start gap-2"
-            >
-              <ToggleGroupItem value="breakfast" className="flex items-center gap-1 border border-gray-200">
-                <Coffee size={16} />
-                <span>Breakfast</span>
-              </ToggleGroupItem>
-              <ToggleGroupItem value="lunch" className="flex items-center gap-1 border border-gray-200">
-                <Utensils size={16} />
-                <span>Lunch</span>
-              </ToggleGroupItem>
-              <ToggleGroupItem value="dinner" className="flex items-center gap-1 border border-gray-200">
-                <ChefHat size={16} />
-                <span>Dinner</span>
-              </ToggleGroupItem>
-              <ToggleGroupItem value="snack" className="flex items-center gap-1 border border-gray-200">
-                <Coffee size={16} />
-                <span>Snack</span>
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </div>
-          
+        <div className="grid grid-cols-1 gap-6">
           <div>
             <h2 className="text-xl font-semibold mb-4">Number of Recipes</h2>
             <Select 
@@ -297,6 +318,12 @@ export function RecipeCreator() {
             </Select>
           </div>
         </div>
+        
+        <MealTypeSelector
+          selectedMealTypes={selectedMealTypes}
+          onToggleMealType={handleToggleMealType}
+          onAddIngredient={handleAddMealTypeIngredient}
+        />
         
         <IngredientSelector
           selectedIngredients={selectedIngredients}
