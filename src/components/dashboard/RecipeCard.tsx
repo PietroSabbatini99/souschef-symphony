@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ChefHat, Clock, Bookmark, Trash2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -96,11 +97,15 @@ export function RecipeCard({
     }
   };
 
+  // Use a more neutral placeholder image
+  const defaultImage = "https://images.unsplash.com/photo-1495195134817-aeb325a55b65?q=80&w=1080&auto=format&fit=crop";
+  const imageSource = imageUrl || defaultImage;
+
   return (
     <Card className="overflow-hidden border border-gray-200 hover:shadow-md transition-shadow">
       <div className="relative aspect-[4/3] overflow-hidden">
         <img
-          src={imageUrl}
+          src={imageSource}
           alt={title}
           className="w-full h-full object-cover transition-all duration-300 hover:opacity-90"
         />
