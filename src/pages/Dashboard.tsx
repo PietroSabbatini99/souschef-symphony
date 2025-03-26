@@ -1,15 +1,10 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
-import { 
-  CuisineSelector, 
-  type CuisineLevel 
-} from '@/components/dashboard/CuisineSelector';
-import { IngredientSelector } from '@/components/dashboard/IngredientSelector';
 import { MealPlanView } from '@/components/dashboard/MealPlanView';
 import { RecipesView } from '@/components/dashboard/RecipesView';
 import { AnalyticsView } from '@/components/dashboard/AnalyticsView';
+import { RecipeCreator } from '@/components/dashboard/RecipeCreator';
 import { 
   Calendar, 
   Settings, 
@@ -18,48 +13,29 @@ import {
   Home, 
   User,
   MessageSquare,
-  Sparkles,
   BarChart
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+interface NavButtonProps {
+  children: React.ReactNode;
+  active?: boolean;
+  onClick?: () => void;
+}
+
 const Dashboard = () => {
-  const [selectedCuisine, setSelectedCuisine] = useState<CuisineLevel | null>(null);
-  const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [activeTab, setActiveTab] = useState<'calendar' | 'recipes' | 'create' | 'analytics'>('calendar');
-  const [isLoading, setIsLoading] = useState(false);
   const { signOut, user } = useAuth();
 
-  const handleAddIngredient = (ingredient: string) => {
-    if (!selectedIngredients.includes(ingredient)) {
-      setSelectedIngredients([...selectedIngredients, ingredient]);
-    }
-  };
-
-  const handleRemoveIngredient = (ingredient: string) => {
-    setSelectedIngredients(selectedIngredients.filter(item => item !== ingredient));
-  };
-
-  const handleGenerateRecipe = async () => {
-    if (!selectedCuisine) return;
-    
-    setIsLoading(true);
+  const handleSignOut = async () => {
     try {
-      // This will be implemented when we add AI integration
-      toast.success("Recipe generation will be implemented in the next phase!");
-      console.log({
-        cuisineLevel: selectedCuisine,
-        ingredients: selectedIngredients
-      });
+      await signOut();
+      toast.success("Logged out successfully!");
     } catch (error) {
-      console.error('Error generating recipe:', error);
-      toast.error('Failed to generate recipe');
-    } finally {
-      setIsLoading(false);
+      console.error("Error signing out:", error);
+      toast.error("Failed to logout");
     }
   };
 
@@ -101,7 +77,7 @@ const Dashboard = () => {
           <Button 
             variant="ghost" 
             className="w-full justify-start text-gray-600"
-            onClick={signOut}
+            onClick={handleSignOut}
           >
             <LogOut size={16} className="mr-2" />
             Logout
@@ -169,52 +145,7 @@ const Dashboard = () => {
           )}
           
           {activeTab === 'create' && (
-            <div className="max-w-4xl mx-auto">
-              <div className="flex items-start justify-between mb-6">
-                <div>
-                  <h1 className="text-2xl font-bold">Create New Recipe</h1>
-                  <p className="text-gray-600">Customize your preferences or let AI surprise you</p>
-                </div>
-                <Badge className="bg-souschef-red/10 text-souschef-red border-souschef-red/20 px-3 py-1.5 flex items-center gap-1.5">
-                  <Sparkles size={14} />
-                  AI-Powered
-                </Badge>
-              </div>
-              
-              <div className="space-y-8">
-                <CuisineSelector 
-                  selectedLevel={selectedCuisine}
-                  onSelect={setSelectedCuisine}
-                />
-                
-                <IngredientSelector
-                  selectedIngredients={selectedIngredients}
-                  onAddIngredient={handleAddIngredient}
-                  onRemoveIngredient={handleRemoveIngredient}
-                />
-                
-                <div className="flex justify-end pt-4 border-t border-gray-200">
-                  <Button 
-                    onClick={handleGenerateRecipe}
-                    disabled={!selectedCuisine || isLoading}
-                    className="px-6 bg-souschef-red hover:bg-souschef-red-light text-white btn-hover"
-                    size="lg"
-                  >
-                    {isLoading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles size={18} className="mr-2" />
-                        Generate Recipe
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </div>
+            <RecipeCreator />
           )}
           
           {activeTab === 'analytics' && (
@@ -225,12 +156,6 @@ const Dashboard = () => {
     </div>
   );
 };
-
-interface NavButtonProps {
-  children: React.ReactNode;
-  active?: boolean;
-  onClick?: () => void;
-}
 
 function NavButton({ children, active, onClick }: NavButtonProps) {
   return (
