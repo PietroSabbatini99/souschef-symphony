@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -8,8 +9,6 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { 
@@ -56,7 +55,6 @@ export function RecipeCreator() {
   const [recipeCount, setRecipeCount] = useState<number>(1);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [isGeneratingImage, setIsGeneratingImage] = useState<boolean>(false);
   const [generatedRecipes, setGeneratedRecipes] = useState<GeneratedRecipe[]>([]);
   const [selectedRecipeIndex, setSelectedRecipeIndex] = useState<number>(0);
   const [showRecipeDialog, setShowRecipeDialog] = useState<boolean>(false);
@@ -112,9 +110,6 @@ export function RecipeCreator() {
       setGeneratedRecipes(response.data.recipes);
       setSelectedRecipeIndex(0);
       setShowRecipeDialog(true);
-
-      // Generate image for the first recipe
-      generateImageForRecipe(0, response.data.recipes);
       
       toast.success(`Generated ${response.data.recipes.length} recipe${response.data.recipes.length > 1 ? 's' : ''}`);
     } catch (error) {
@@ -122,41 +117,6 @@ export function RecipeCreator() {
       toast.error(`Failed to generate recipes: ${error.message}`);
     } finally {
       setIsGenerating(false);
-    }
-  };
-
-  const generateImageForRecipe = async (index: number, recipes = generatedRecipes) => {
-    if (!recipes[index]) return;
-
-    try {
-      setIsGeneratingImage(true);
-      
-      const response = await supabase.functions.invoke('generate-image', {
-        body: {
-          prompt: recipes[index].image_prompt || recipes[index].title
-        }
-      });
-
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
-
-      if (!response.data.imageUrl) {
-        throw new Error("No image was generated");
-      }
-
-      const updatedRecipes = [...recipes];
-      updatedRecipes[index] = {
-        ...updatedRecipes[index],
-        image_url: response.data.imageUrl
-      };
-      
-      setGeneratedRecipes(updatedRecipes);
-    } catch (error) {
-      console.error("Error generating image:", error);
-      toast.error(`Failed to generate image: ${error.message}`);
-    } finally {
-      setIsGeneratingImage(false);
     }
   };
 
@@ -177,7 +137,6 @@ export function RecipeCreator() {
       const response = await supabase.functions.invoke('save-recipe', {
         body: {
           recipe,
-          imageUrl: recipe.image_url,
           mealType: selectedMealTypes,
           plannedDate: format(today, 'yyyy-MM-dd')
         }
@@ -344,38 +303,6 @@ export function RecipeCreator() {
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-6">
-                  <div className="aspect-square rounded-md overflow-hidden bg-gray-100 relative">
-                    {selectedRecipe.image_url ? (
-                      <img 
-                        src={selectedRecipe.image_url} 
-                        alt={selectedRecipe.title} 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        {isGeneratingImage ? (
-                          <div className="flex flex-col items-center">
-                            <Loader2 className="h-10 w-10 text-gray-400 animate-spin" />
-                            <p className="text-sm text-gray-500 mt-3">Generating image...</p>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center">
-                            <ImageIcon className="h-10 w-10 text-gray-400" />
-                            <p className="text-sm text-gray-500 mt-3">No image available</p>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="mt-3"
-                              onClick={() => generateImageForRecipe(selectedRecipeIndex)}
-                            >
-                              Generate Image
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
                   <div className="flex flex-wrap gap-3">
                     <Badge variant="outline" className="flex items-center gap-1.5">
                       <Clock size={14} /> {selectedRecipe.cooking_time} mins

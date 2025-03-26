@@ -36,7 +36,6 @@ serve(async (req) => {
     // Get the recipe data from the request
     const { 
       recipe,
-      imageUrl,
       mealType,
       plannedDate
     } = await req.json();
@@ -45,6 +44,8 @@ serve(async (req) => {
       throw new Error('Recipe data is required');
     }
 
+    console.log("Debug: Auth header present, checking auth status");
+    
     // Get the user from the authorization header
     const {
       data: { user },
@@ -71,7 +72,7 @@ serve(async (req) => {
       instructions: recipe.instructions,
       cooking_time: recipe.cooking_time,
       difficulty: recipe.difficulty,
-      image_url: imageUrl || recipe.image_url,
+      image_url: recipe.image_url || null,
       user_id: user.id,
     };
 
@@ -93,7 +94,7 @@ serve(async (req) => {
     
     // If meal type and planned date are provided, create a meal plan entry
     if (mealType && plannedDate) {
-      // If the meal type is an array, create a meal plan entry for each type
+      // Convert meal type to array if it's not already
       const mealTypes = Array.isArray(mealType) ? mealType : [mealType];
       
       console.log("Creating meal plans for types:", mealTypes);
