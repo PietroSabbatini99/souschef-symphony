@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -176,12 +175,15 @@ export function useAnalyticsData() {
       
       console.log('Saving preferences:', dietaryPreferences);
       
-      // Update the profile - convert object to JSON string for storage
-      // This is necessary because Supabase expects dietary_preferences to be stored as JSON
+      // Convert dietary preferences to serializable format for storage
+      // This is the key fix - we're converting the preferences to an array format
+      // to match what Supabase expects in the dietary_preferences column
+      const allergensToSave: string[] = allergensArray;
+      
       const { error } = await supabase
         .from('profiles')
         .update({
-          dietary_preferences: dietaryPreferences, // Store as JSON object, not as string[]
+          dietary_preferences: allergensToSave, // Store as string[] for compatibility
         })
         .eq('id', user.id);
         
