@@ -31,6 +31,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { DietaryPreferences } from './analytics/types';
 
 interface GeneratedRecipe {
   title: string;
@@ -61,11 +62,7 @@ export function RecipeCreator() {
   const [generatedRecipes, setGeneratedRecipes] = useState<GeneratedRecipe[]>([]);
   const [selectedRecipeIndex, setSelectedRecipeIndex] = useState<number>(0);
   const [showRecipeDialog, setShowRecipeDialog] = useState<boolean>(false);
-  const [userPreferences, setUserPreferences] = useState<{
-    dailyCalorieGoal?: number;
-    weeklyCalorieGoal?: number;
-    allergens?: string[];
-  }>({});
+  const [userPreferences, setUserPreferences] = useState<DietaryPreferences>({});
   
   const { user } = useAuth();
 
@@ -114,7 +111,7 @@ export function RecipeCreator() {
         if (error) throw error;
         
         if (data && data.dietary_preferences) {
-          setUserPreferences(data.dietary_preferences);
+          setUserPreferences(data.dietary_preferences as DietaryPreferences);
         }
       } catch (error) {
         console.error('Error fetching user preferences:', error);
@@ -139,7 +136,6 @@ export function RecipeCreator() {
       setIsGenerating(true);
       setGeneratedRecipes([]);
       
-      // Only include the selected meal types with their ingredients
       const mealTypeIngredientsToSend = {};
       selectedMealTypes.forEach(mealType => {
         mealTypeIngredientsToSend[mealType] = mealTypeIngredients[mealType];
@@ -188,18 +184,15 @@ export function RecipeCreator() {
       const recipe = generatedRecipes[selectedRecipeIndex];
       const today = new Date();
       
-      // Map cuisine level to difficulty if not already provided in recipe
       const difficultyMapping = {
         street: "easy",
         home: "medium",
         gourmet: "hard"
       };
       
-      // Use either the recipe's difficulty or map from selected cuisine level
       const recipeDifficulty = recipe.difficulty || 
         difficultyMapping[selectedCuisine || 'home'];
       
-      // Save recipe directly to the database
       const { data: savedRecipe, error: recipeError } = await supabase
         .from('recipes')
         .insert({
@@ -220,7 +213,6 @@ export function RecipeCreator() {
         throw new Error(`Failed to save recipe: ${recipeError.message}`);
       }
 
-      // Create a meal plan entry for the recipe's meal type
       const mealType = recipe.meal_type || selectedMealTypes[0];
       
       const { error: mealPlanError } = await supabase
@@ -239,7 +231,6 @@ export function RecipeCreator() {
         toast.success("Recipe saved and added to meal plan!");
       }
       
-      // Close the dialog after saving
       setShowRecipeDialog(false);
     } catch (error) {
       console.error("Error saving recipe:", error);
@@ -266,7 +257,6 @@ export function RecipeCreator() {
     }
   };
 
-  // Group recipes by meal type for easier navigation
   const recipesByMealType = generatedRecipes.reduce((acc, recipe, index) => {
     const mealType = recipe.meal_type || 'other';
     if (!acc[mealType]) acc[mealType] = [];
@@ -363,7 +353,6 @@ export function RecipeCreator() {
         </div>
       </div>
 
-      {/* Recipe Viewer Dialog */}
       <Dialog open={showRecipeDialog} onOpenChange={setShowRecipeDialog}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           {selectedRecipe && (

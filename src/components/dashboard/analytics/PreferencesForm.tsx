@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +8,7 @@ import { Flame, Goal, ShieldAlert, Save } from 'lucide-react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { DietaryPreferences, UserPreferencesFormValues } from './types';
 
 // Form schema for user preferences
 const userPreferencesSchema = z.object({
@@ -20,14 +20,6 @@ const userPreferencesSchema = z.object({
   }),
   allergens: z.string(),
 });
-
-type UserPreferencesFormValues = z.infer<typeof userPreferencesSchema>;
-
-interface DietaryPreferences {
-  dailyCalorieGoal?: number;
-  weeklyCalorieGoal?: number;
-  allergens?: string[];
-}
 
 interface PreferencesFormProps {
   initialPreferences: DietaryPreferences;
