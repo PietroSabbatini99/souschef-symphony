@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Search, ChefHat, ArrowLeft, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -99,12 +98,10 @@ export function RecipesView() {
   };
 
   const getCuisineLevel = (recipe: Recipe): 'street' | 'home' | 'gourmet' => {
-    // First check if cuisine is explicitly set to one of our recognized levels
     if (recipe.cuisine && ['street', 'home', 'gourmet'].includes(recipe.cuisine)) {
       return recipe.cuisine as 'street' | 'home' | 'gourmet';
     }
     
-    // If not, fall back to mapping from difficulty
     switch (recipe.difficulty) {
       case 'easy':
         return 'street';
@@ -228,7 +225,6 @@ export function RecipesView() {
     <div className="w-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold">My Recipes</h2>
           <p className="text-gray-600"></p>
         </div>
         

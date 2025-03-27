@@ -19,7 +19,6 @@ export function AccountView() {
 
   return (
     <div className="p-4 bg-white rounded-lg shadow">
-      <h2 className="text-xl font-semibold mb-4">Account Settings</h2>
       {user && (
         <div className="mb-6">
           <p className="text-gray-600">Email: {user.email}</p>

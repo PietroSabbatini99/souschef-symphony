@@ -7,9 +7,9 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ activeTab }: DashboardHeaderProps) {
   return (
-    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sticky top-0 z-10">
+    <header className="h-16 bg-white flex items-center justify-between px-4 sticky top-0 z-10">
       <div className="flex items-center gap-2">
-        <h1 className="text-xl font-bold">
+        <h1 className="text-2xl font-bold">
           {activeTab === 'calendar' && 'Meal Calendar'}
           {activeTab === 'recipes' && 'My Recipes'}
           {activeTab === 'create' && 'Create Recipe'}

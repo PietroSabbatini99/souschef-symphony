@@ -35,12 +35,6 @@ export function MealPlanContent({ selectedDate, mealPlans, loading }: MealPlanCo
 
   return (
     <>
-      <div className="mb-4">
-        <h3 className="text-xl font-semibold">
-          {format(selectedDate, 'EEEE, MMMM d')} Meals
-        </h3>
-      </div>
-      
       {mealPlans.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {mealPlans.map((mealPlan) => (
