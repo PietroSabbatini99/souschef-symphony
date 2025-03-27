@@ -1,3 +1,4 @@
+
 // Add the ChartDataPoint interface if it's not already defined
 export interface ChartDataPoint {
   name?: string;
@@ -24,4 +25,32 @@ export interface DietaryPreferences {
   proteinGoal?: number;
   carbsGoal?: number;
   fatGoal?: number;
+}
+
+// Add the missing types used in AnalyticsView.tsx
+export interface CuisineDataPoint {
+  name: string;
+  value: number;
+}
+
+export interface MealTypeDataPoint {
+  name: string;
+  value: number;
+}
+
+export interface UserPreferencesFormValues {
+  vegetarian: boolean;
+  vegan: boolean;
+  glutenFree: boolean;
+  dairyFree: boolean;
+  nutFree: boolean;
+  pescatarian: boolean;
+  keto: boolean;
+  paleo: boolean;
+  lowCarb: boolean;
+  lowFat: boolean;
+  caloriesGoal: number;
+  proteinGoal: number;
+  carbsGoal: number;
+  fatGoal: number;
 }
