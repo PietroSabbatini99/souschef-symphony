@@ -48,13 +48,24 @@ export const CalorieTrackingChart: React.FC<CalorieTrackingChartProps> = ({
               activeDot={{ r: 8 }} 
             />
             {dailyCalorieGoal && (
-              <ReferenceLine 
-                y={dailyCalorieGoal} 
-                name="Calorie Goal"
-                stroke="#4ECDC4" 
-                strokeWidth={2}
-                isFront={false}
-              />
+              <>
+                <ReferenceLine 
+                  y={dailyCalorieGoal} 
+                  stroke="#4ECDC4" 
+                  strokeWidth={2}
+                  isFront={false}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="goal" 
+                  name="Calorie Goal" 
+                  stroke="#4ECDC4" 
+                  activeDot={false}
+                  dot={false}
+                  legendType="line"
+                  hide={true}
+                />
+              </>
             )}
           </LineChart>
         </ResponsiveContainer>
