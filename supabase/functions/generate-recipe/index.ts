@@ -20,7 +20,8 @@ serve(async (req) => {
       cuisineLevel, 
       ingredients = {},
       mealTypes = ["dinner"],
-      count = 1 
+      count = 1,
+      dietaryPreferences = {} // New parameter for dietary preferences
     } = await req.json();
 
     if (!cuisineLevel) {
@@ -56,8 +57,18 @@ serve(async (req) => {
         promptIngredients = `using the following ingredients: ${mealIngredients.join(", ")}`;
       }
 
+      // Add dietary preferences to the prompt
+      let dietaryConstraints = "";
+      if (dietaryPreferences.dailyCalorieGoal) {
+        dietaryConstraints += ` The recipe should fit within a daily calorie goal of ${dietaryPreferences.dailyCalorieGoal} calories.`;
+      }
+      
+      if (dietaryPreferences.allergens && dietaryPreferences.allergens.length > 0) {
+        dietaryConstraints += ` Strictly avoid the following allergens: ${dietaryPreferences.allergens.join(", ")}.`;
+      }
+
       // Construct recipe generation prompt for this meal type
-      const systemPrompt = `You are a professional chef specialized in creating ${styleDescription} recipes. Generate a ${mealType} recipe ${promptIngredients}.
+      const systemPrompt = `You are a professional chef specialized in creating ${styleDescription} recipes. Generate a ${mealType} recipe ${promptIngredients}.${dietaryConstraints}
 
 For the recipe name:
 - If cuisine level is "street": Create a catchy, simple name
@@ -73,7 +84,8 @@ Provide the following JSON structure:
   "cooking_time": cooking time in minutes (number only),
   "difficulty": "easy", "medium", or "hard" based on complexity,
   "image_prompt": "A detailed description for generating an image of this dish",
-  "meal_type": "${mealType}"
+  "meal_type": "${mealType}",
+  "calories_per_serving": approximate calories per serving (number only)
 }`;
 
       console.log(`Sending request to OpenAI for ${mealType} recipe`);
@@ -88,7 +100,7 @@ Provide the following JSON structure:
           model: 'gpt-4o',
           messages: [
             { role: 'system', content: systemPrompt },
-            { role: 'user', content: `Create a ${cuisineLevel} ${mealType} recipe ${promptIngredients}.` }
+            { role: 'user', content: `Create a ${cuisineLevel} ${mealType} recipe ${promptIngredients}${dietaryConstraints}.` }
           ],
           temperature: 0.7,
         }),

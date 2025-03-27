@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
   Dialog,
@@ -62,6 +61,11 @@ export function RecipeCreator() {
   const [generatedRecipes, setGeneratedRecipes] = useState<GeneratedRecipe[]>([]);
   const [selectedRecipeIndex, setSelectedRecipeIndex] = useState<number>(0);
   const [showRecipeDialog, setShowRecipeDialog] = useState<boolean>(false);
+  const [userPreferences, setUserPreferences] = useState<{
+    dailyCalorieGoal?: number;
+    weeklyCalorieGoal?: number;
+    allergens?: string[];
+  }>({});
   
   const { user } = useAuth();
 
@@ -79,7 +83,6 @@ export function RecipeCreator() {
     if (!ingredient.trim()) return;
     
     setMealTypeIngredients(prev => {
-      // Only add if the ingredient isn't already in the list
       if (!prev[mealType].includes(ingredient)) {
         return {
           ...prev,
@@ -96,6 +99,30 @@ export function RecipeCreator() {
       [mealType]: prev[mealType].filter(item => item !== ingredient)
     }));
   };
+
+  useEffect(() => {
+    const fetchUserPreferences = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('dietary_preferences')
+          .eq('id', user.id)
+          .single();
+          
+        if (error) throw error;
+        
+        if (data && data.dietary_preferences) {
+          setUserPreferences(data.dietary_preferences);
+        }
+      } catch (error) {
+        console.error('Error fetching user preferences:', error);
+      }
+    };
+    
+    fetchUserPreferences();
+  }, [user]);
 
   const handleGenerateRecipes = async () => {
     if (!selectedCuisine) {
@@ -123,7 +150,8 @@ export function RecipeCreator() {
           cuisineLevel: selectedCuisine,
           ingredients: mealTypeIngredientsToSend,
           mealTypes: selectedMealTypes,
-          count: recipeCount
+          count: recipeCount,
+          dietaryPreferences: userPreferences
         }
       });
 
@@ -181,7 +209,7 @@ export function RecipeCreator() {
           instructions: recipe.instructions,
           cooking_time: recipe.cooking_time,
           difficulty: recipeDifficulty,
-          cuisine: selectedCuisine || 'home', // Store the selected cuisine level
+          cuisine: selectedCuisine || 'home',
           image_url: recipe.image_url || null,
           user_id: user.id
         })
