@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend } from 'recharts';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend, ReferenceLine } from 'recharts';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Flame } from 'lucide-react';
 
@@ -48,12 +48,12 @@ export const CalorieTrackingChart: React.FC<CalorieTrackingChartProps> = ({
               activeDot={{ r: 8 }} 
             />
             {dailyCalorieGoal && (
-              <Line 
-                type="monotone" 
-                dataKey={() => dailyCalorieGoal} 
-                name="Calorie Goal" 
+              <ReferenceLine 
+                y={dailyCalorieGoal} 
+                label="Target" 
                 stroke="#4ECDC4" 
-                strokeDasharray="5 5" 
+                strokeDasharray="3 3" 
+                isFront={true}
               />
             )}
           </LineChart>
