@@ -9,7 +9,6 @@ import { RecipeCreator } from '@/components/dashboard/RecipeCreator';
 import { 
   Calendar, 
   Settings, 
-  LogOut, 
   ChefHat, 
   Home, 
   User,
@@ -32,18 +31,8 @@ import {
 
 const Dashboard = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [activeTab, setActiveTab] = useState<'calendar' | 'recipes' | 'create' | 'analytics'>('calendar');
-  const { signOut, user } = useAuth();
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      toast.success("Logged out successfully!");
-    } catch (error) {
-      console.error("Error signing out:", error);
-      toast.error("Failed to logout");
-    }
-  };
+  const [activeTab, setActiveTab] = useState<'calendar' | 'recipes' | 'create' | 'analytics' | 'account'>('calendar');
+  const { user } = useAuth();
 
   return (
     <SidebarProvider defaultOpen={false}>
@@ -58,13 +47,8 @@ const Dashboard = () => {
                 {activeTab === 'recipes' && 'My Recipes'}
                 {activeTab === 'create' && 'Create Recipe'}
                 {activeTab === 'analytics' && 'Analytics'}
+                {activeTab === 'account' && 'Account'}
               </h1>
-            </div>
-            
-            <div className="flex items-center">
-              <Button variant="ghost" size="icon" className="text-gray-500">
-                <User size={20} />
-              </Button>
             </div>
           </header>
           
@@ -87,6 +71,32 @@ const Dashboard = () => {
             
             {activeTab === 'analytics' && (
               <AnalyticsView />
+            )}
+            
+            {activeTab === 'account' && (
+              <div className="p-4 bg-white rounded-lg shadow">
+                <h2 className="text-xl font-semibold mb-4">Account Settings</h2>
+                {user && (
+                  <div className="mb-6">
+                    <p className="text-gray-600">Email: {user.email}</p>
+                  </div>
+                )}
+                <Button 
+                  variant="destructive" 
+                  onClick={async () => {
+                    try {
+                      await useAuth().signOut();
+                      toast.success("Logged out successfully!");
+                    } catch (error) {
+                      console.error("Error signing out:", error);
+                      toast.error("Failed to logout");
+                    }
+                  }}
+                  className="mt-4"
+                >
+                  Log Out
+                </Button>
+              </div>
             )}
           </main>
         </SidebarInset>
@@ -129,10 +139,10 @@ const Dashboard = () => {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="text-gray-500" 
-              onClick={handleSignOut}
+              className={`text-gray-500 ${activeTab === 'account' ? 'text-souschef-red' : ''}`} 
+              onClick={() => setActiveTab('account')}
             >
-              <LogOut size={24} />
+              <User size={24} />
             </Button>
           </div>
         </div>
