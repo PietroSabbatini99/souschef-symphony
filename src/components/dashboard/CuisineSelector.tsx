@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Utensils, Coffee, ChefHat } from 'lucide-react';
+import { Utensils, ChefHat, Truck } from 'lucide-react';
 
 export type CuisineLevel = 'street' | 'home' | 'gourmet';
 
@@ -16,7 +16,7 @@ export function CuisineSelector({ selectedLevel, onSelect }: CuisineSelectorProp
       id: 'street', 
       name: 'Street Food', 
       description: 'Quick, casual recipes with bold flavors', 
-      icon: <Coffee className="w-6 h-6" /> 
+      icon: <Truck className="w-6 h-6" /> 
     },
     { 
       id: 'home', 
