@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts';
@@ -57,15 +56,18 @@ const userPreferencesSchema = z.object({
 
 type UserPreferencesFormValues = z.infer<typeof userPreferencesSchema>;
 
+// Interface for dietary preferences to ensure type safety
+interface DietaryPreferences {
+  dailyCalorieGoal?: number;
+  weeklyCalorieGoal?: number;
+  allergens?: string[];
+}
+
 export function AnalyticsView() {
   const { user } = useAuth();
   const [tabView, setTabView] = useState('insights');
   const [isLoading, setIsLoading] = useState(false);
-  const [userPreferences, setUserPreferences] = useState<{
-    dailyCalorieGoal?: number;
-    weeklyCalorieGoal?: number;
-    allergens?: string[];
-  }>({});
+  const [userPreferences, setUserPreferences] = useState<DietaryPreferences>({});
 
   const form = useForm<UserPreferencesFormValues>({
     resolver: zodResolver(userPreferencesSchema),
@@ -91,7 +93,7 @@ export function AnalyticsView() {
         if (error) throw error;
         
         if (data && data.dietary_preferences) {
-          const preferences = data.dietary_preferences;
+          const preferences = data.dietary_preferences as DietaryPreferences;
           
           setUserPreferences({
             dailyCalorieGoal: preferences.dailyCalorieGoal,
@@ -109,7 +111,7 @@ export function AnalyticsView() {
     };
     
     fetchUserPreferences();
-  }, [user]);
+  }, [user, form]);
 
   const onSubmit = async (values: UserPreferencesFormValues) => {
     if (!user) {
@@ -127,9 +129,9 @@ export function AnalyticsView() {
         .filter(item => item);
       
       // Prepare the dietary preferences object
-      const dietaryPreferences = {
-        dailyCalorieGoal: values.dailyCalorieGoal ? parseInt(values.dailyCalorieGoal) : null,
-        weeklyCalorieGoal: values.weeklyCalorieGoal ? parseInt(values.weeklyCalorieGoal) : null,
+      const dietaryPreferences: DietaryPreferences = {
+        dailyCalorieGoal: values.dailyCalorieGoal ? parseInt(values.dailyCalorieGoal) : undefined,
+        weeklyCalorieGoal: values.weeklyCalorieGoal ? parseInt(values.weeklyCalorieGoal) : undefined,
         allergens: allergensArray,
       };
       
@@ -144,11 +146,7 @@ export function AnalyticsView() {
       if (error) throw error;
       
       // Update local state
-      setUserPreferences({
-        dailyCalorieGoal: dietaryPreferences.dailyCalorieGoal || undefined,
-        weeklyCalorieGoal: dietaryPreferences.weeklyCalorieGoal || undefined,
-        allergens: allergensArray,
-      });
+      setUserPreferences(dietaryPreferences);
       
       toast.success('Preferences saved successfully');
     } catch (error) {

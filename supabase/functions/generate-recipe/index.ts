@@ -21,7 +21,7 @@ serve(async (req) => {
       ingredients = {},
       mealTypes = ["dinner"],
       count = 1,
-      dietaryPreferences = {} // New parameter for dietary preferences
+      dietaryPreferences = {} // Parameter for dietary preferences
     } = await req.json();
 
     if (!cuisineLevel) {
