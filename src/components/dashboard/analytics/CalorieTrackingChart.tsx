@@ -50,10 +50,10 @@ export const CalorieTrackingChart: React.FC<CalorieTrackingChartProps> = ({
             {dailyCalorieGoal && (
               <ReferenceLine 
                 y={dailyCalorieGoal} 
-                label="Target" 
+                name="Calorie Goal"
                 stroke="#4ECDC4" 
-                strokeDasharray="3 3" 
-                isFront={true}
+                strokeWidth={2}
+                isFront={false}
               />
             )}
           </LineChart>
