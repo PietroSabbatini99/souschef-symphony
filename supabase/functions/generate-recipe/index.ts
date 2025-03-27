@@ -17,6 +17,7 @@ serve(async (req) => {
       ingredients = {},
       mealTypes = ["dinner"],
       count = 1,
+      servings = 2,
       dietaryPreferences = {}
     } = await req.json();
 
@@ -57,10 +58,11 @@ serve(async (req) => {
         mealType, 
         styleDescription, 
         promptIngredients, 
-        dietaryConstraints
+        dietaryConstraints,
+        servings
       );
 
-      const userPrompt = `Create a ${cuisineLevel} ${mealType} recipe ${promptIngredients}${dietaryConstraints}. Be accurate and realistic with calorie calculations.`;
+      const userPrompt = `Create a ${cuisineLevel} ${mealType} recipe ${promptIngredients} for ${servings} ${servings === 1 ? 'person' : 'persons'}${dietaryConstraints}. Be accurate and realistic with calorie calculations.`;
       
       const openAIResponse = await generateRecipeWithOpenAI(systemPrompt, userPrompt, mealType);
       
@@ -68,6 +70,11 @@ serve(async (req) => {
       const recipe = processRecipeResponse(openAIResponse, mealType);
       
       if (recipe) {
+        // Add servings count to the recipe if not included in the response
+        if (!recipe.servings) {
+          recipe.servings = servings;
+        }
+        
         allRecipes.push(recipe);
       }
     }

@@ -9,13 +9,14 @@ export function generateRecipePrompt(
   mealType: string, 
   styleDescription: string,
   promptIngredients: string, 
-  dietaryConstraints: string
+  dietaryConstraints: string,
+  servings: number = 2
 ) {
   // Get calorie guidelines for the meal type
   const calorieGuideline = calorieGuidelines[mealType] || 
     "Aim for a realistic calorie count based on ingredients and portion size";
 
-  return `You are a professional chef specialized in creating ${styleDescription} recipes. Generate a ${mealType} recipe ${promptIngredients}.${dietaryConstraints}
+  return `You are a professional chef specialized in creating ${styleDescription} recipes. Generate a ${mealType} recipe ${promptIngredients} for ${servings} ${servings === 1 ? 'person' : 'persons'}.${dietaryConstraints}
 
 For the recipe name:
 - If cuisine level is "street": Create a catchy, simple name
@@ -34,7 +35,8 @@ Provide the following JSON structure:
   "difficulty": "easy", "medium", or "hard" based on complexity,
   "image_prompt": "A detailed description for generating an image of this dish",
   "meal_type": "${mealType}",
-  "calories_per_serving": realistic calories per serving (number only)
+  "calories_per_serving": realistic calories per serving (number only),
+  "servings": ${servings}
 }`;
 }
 

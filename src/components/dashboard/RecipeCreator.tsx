@@ -14,6 +14,8 @@ export function RecipeCreator() {
     selectedMealTypes,
     recipeCount,
     setRecipeCount,
+    servingsCount,
+    setServingsCount,
     isGenerating,
     isSaving,
     generatedRecipes,
@@ -51,6 +53,8 @@ export function RecipeCreator() {
         handleRemoveMealTypeIngredient={handleRemoveMealTypeIngredient}
         recipeCount={recipeCount}
         setRecipeCount={setRecipeCount}
+        servingsCount={servingsCount}
+        setServingsCount={setServingsCount}
         isGenerating={isGenerating}
         onGenerateRecipes={handleGenerateRecipes}
       />

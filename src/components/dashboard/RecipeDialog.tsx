@@ -17,7 +17,8 @@ import {
   Coffee,
   Utensils,
   Loader2,
-  Flame
+  Flame,
+  Users
 } from 'lucide-react';
 import { CuisineLevel } from '@/components/dashboard/CuisineSelector';
 
@@ -32,6 +33,7 @@ export interface GeneratedRecipe {
   image_url?: string;
   meal_type: string;
   calories_per_serving?: number;
+  servings?: number;
 }
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
@@ -110,6 +112,9 @@ export function RecipeDialog({
                   <Flame size={14} /> {selectedRecipe.calories_per_serving} kcal
                 </Badge>
               )}
+              <Badge variant="outline" className="flex items-center gap-1.5">
+                <Users size={14} /> {selectedRecipe.servings || 2} {(selectedRecipe.servings || 2) === 1 ? 'person' : 'persons'}
+              </Badge>
             </div>
 
             {Object.keys(recipesByMealType).length > 0 && (

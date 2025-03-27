@@ -8,6 +8,7 @@ export interface RecipeGenerationState {
   mealTypeIngredients: Record<MealType, string[]>;
   selectedMealTypes: MealType[];
   recipeCount: number;
+  servingsCount: number;
   isGenerating: boolean;
   isSaving: boolean;
   generatedRecipes: GeneratedRecipe[];
@@ -19,6 +20,7 @@ export interface RecipeGenerationState {
 export interface RecipeGenerationActions {
   setSelectedCuisine: (cuisine: CuisineLevel | null) => void;
   setRecipeCount: (count: number) => void;
+  setServingsCount: (count: number) => void;
   setSelectedRecipeIndex: (index: number) => void;
   setShowRecipeDialog: (show: boolean) => void;
   handleToggleMealType: (mealType: MealType) => void;

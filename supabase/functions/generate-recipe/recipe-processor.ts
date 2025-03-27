@@ -24,6 +24,13 @@ export function processRecipeResponse(content: string, mealType: string) {
       // Ensure there's a realistic calories_per_serving field
       validateAndNormalizeCalories(recipe, mealType);
       
+      // Ensure servings count is a number
+      if (recipe.servings && typeof recipe.servings !== 'number') {
+        recipe.servings = parseInt(recipe.servings) || 2;
+      } else if (!recipe.servings) {
+        recipe.servings = 2; // Default to 2 servings if not specified
+      }
+      
       return recipe;
     }
     

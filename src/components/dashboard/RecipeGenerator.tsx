@@ -1,11 +1,10 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Sparkles, Loader2, Calendar, Users } from 'lucide-react';
 import { CuisineSelector, type CuisineLevel } from '@/components/dashboard/CuisineSelector';
 import { MealTypeSelector } from '@/components/dashboard/MealTypeSelector';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar } from 'lucide-react';
 import { MealType } from './RecipeDialog';
 
 interface RecipeGeneratorProps {
@@ -18,6 +17,8 @@ interface RecipeGeneratorProps {
   handleRemoveMealTypeIngredient: (mealType: MealType, ingredient: string) => void;
   recipeCount: number;
   setRecipeCount: (count: number) => void;
+  servingsCount: number;
+  setServingsCount: (count: number) => void;
   isGenerating: boolean;
   onGenerateRecipes: () => void;
 }
@@ -32,6 +33,8 @@ export function RecipeGenerator({
   handleRemoveMealTypeIngredient,
   recipeCount,
   setRecipeCount,
+  servingsCount,
+  setServingsCount,
   isGenerating,
   onGenerateRecipes
 }: RecipeGeneratorProps) {
@@ -78,6 +81,28 @@ export function RecipeGenerator({
                     7-Day Meal Plan
                   </div>
                 </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Number of Persons</h2>
+            <Select 
+              value={servingsCount.toString()} 
+              onValueChange={(value) => setServingsCount(parseInt(value))}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Number of persons" />
+              </SelectTrigger>
+              <SelectContent>
+                {[1, 2, 3, 4, 5, 6].map(num => (
+                  <SelectItem key={num} value={num.toString()}>
+                    <div className="flex items-center">
+                      <Users className="mr-2 h-4 w-4" />
+                      {num === 1 ? '1 Person' : `${num} Persons`}
+                    </div>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

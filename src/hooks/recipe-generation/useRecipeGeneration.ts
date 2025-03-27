@@ -13,6 +13,7 @@ import { RecipeGenerationHook } from './types';
 export function useRecipeGeneration(): RecipeGenerationHook {
   const [selectedCuisine, setSelectedCuisine] = useState<CuisineLevel | null>(null);
   const [recipeCount, setRecipeCount] = useState<number>(1);
+  const [servingsCount, setServingsCount] = useState<number>(2); // Default to 2 persons
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [generatedRecipes, setGeneratedRecipes] = useState<GeneratedRecipe[]>([]);
@@ -55,6 +56,7 @@ export function useRecipeGeneration(): RecipeGenerationHook {
           ingredients: mealTypeIngredientsToSend,
           mealTypes: selectedMealTypes,
           count: recipeCount,
+          servings: servingsCount, // Include the servings count in the request
           dietaryPreferences: userPreferences
         }
       });
@@ -122,7 +124,8 @@ export function useRecipeGeneration(): RecipeGenerationHook {
           cuisine: selectedCuisine, // Always save the explicitly selected cuisine level
           image_url: recipe.image_url || null,
           user_id: user.id,
-          calories_per_serving: caloriesPerServing  // Save calories per serving
+          calories_per_serving: caloriesPerServing,  // Save calories per serving
+          servings: servingsCount  // Save the number of servings
         })
         .select()
         .single();
@@ -165,6 +168,8 @@ export function useRecipeGeneration(): RecipeGenerationHook {
     selectedMealTypes,
     recipeCount,
     setRecipeCount,
+    servingsCount,
+    setServingsCount,
     isGenerating,
     isSaving,
     generatedRecipes,
