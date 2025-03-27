@@ -1,16 +1,12 @@
 
+// This might already be in the codebase. If not, this will create it.
 export interface DietaryPreferences {
-  dailyCalorieGoal?: number;
-  weeklyCalorieGoal?: number;
-  allergens?: string[];
+  [key: string]: boolean | string | number | null;
 }
 
 export interface ChartDataPoint {
-  day: string;
-  recipes: number;
-  meals: number;
-  calories: number;
-  [key: string]: any;
+  name: string;
+  value: number;
 }
 
 export interface CuisineDataPoint {
@@ -23,8 +19,11 @@ export interface MealTypeDataPoint {
   count: number;
 }
 
-export type UserPreferencesFormValues = {
-  dailyCalorieGoal: string;
-  weeklyCalorieGoal: string;
-  allergens: string;
-};
+export interface UserPreferencesFormValues {
+  dailyCalories: number;
+  dietaryRestrictions: string[];
+  cuisinePreferences: string[];
+  proteinGoal: number;
+  carbGoal: number;
+  fatGoal: number;
+}
