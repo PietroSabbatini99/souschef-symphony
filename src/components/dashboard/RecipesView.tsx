@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Search, ChefHat, ArrowLeft, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,7 @@ interface Recipe {
   image_url: string;
   cooking_time: number;
   difficulty: string;
+  cuisine: string;
   ingredients: Record<string, any> | string | any[];
   instructions: string;
   created_at: string;
@@ -96,8 +98,14 @@ export function RecipesView() {
     }
   };
 
-  const getDifficultyLevel = (difficulty: string): 'street' | 'home' | 'gourmet' => {
-    switch (difficulty) {
+  const getCuisineLevel = (recipe: Recipe): 'street' | 'home' | 'gourmet' => {
+    // First check if cuisine is explicitly set to one of our recognized levels
+    if (recipe.cuisine && ['street', 'home', 'gourmet'].includes(recipe.cuisine)) {
+      return recipe.cuisine as 'street' | 'home' | 'gourmet';
+    }
+    
+    // If not, fall back to mapping from difficulty
+    switch (recipe.difficulty) {
       case 'easy':
         return 'street';
       case 'medium':
@@ -140,14 +148,6 @@ export function RecipesView() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
-            <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden mb-5">
-              <img 
-                src={viewingRecipe.image_url || 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?q=80&w=1080&auto=format&fit=crop'} 
-                alt={viewingRecipe.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-
             <div className="space-y-6">
               <div>
                 <h3 className="text-xl font-semibold mb-2">Description</h3>
@@ -180,18 +180,26 @@ export function RecipesView() {
               
               <div className="space-y-4">
                 <div>
-                  <div className="text-sm text-gray-500 mb-1">Difficulty</div>
+                  <div className="text-sm text-gray-500 mb-1">Cuisine Style</div>
                   <Badge 
                     variant="outline" 
                     className={`
-                      ${getDifficultyLevel(viewingRecipe.difficulty) === 'street' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : ''}
-                      ${getDifficultyLevel(viewingRecipe.difficulty) === 'home' ? 'bg-blue-50 text-blue-700 border-blue-200' : ''}
-                      ${getDifficultyLevel(viewingRecipe.difficulty) === 'gourmet' ? 'bg-purple-50 text-purple-700 border-purple-200' : ''}
+                      ${getCuisineLevel(viewingRecipe) === 'street' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : ''}
+                      ${getCuisineLevel(viewingRecipe) === 'home' ? 'bg-blue-50 text-blue-700 border-blue-200' : ''}
+                      ${getCuisineLevel(viewingRecipe) === 'gourmet' ? 'bg-purple-50 text-purple-700 border-purple-200' : ''}
                     `}
                   >
+                    {getCuisineLevel(viewingRecipe) === 'street' ? 'Street Food' : 
+                     getCuisineLevel(viewingRecipe) === 'home' ? 'Home Cooking' : 'Gourmet'}
+                  </Badge>
+                </div>
+                
+                <div>
+                  <div className="text-sm text-gray-500 mb-1">Difficulty</div>
+                  <div className="font-medium">
                     {viewingRecipe.difficulty === 'easy' ? 'Easy' : 
                      viewingRecipe.difficulty === 'medium' ? 'Medium' : 'Hard'}
-                  </Badge>
+                  </div>
                 </div>
                 
                 <div>
@@ -261,7 +269,7 @@ export function RecipesView() {
               description={recipe.description || ''}
               imageUrl={recipe.image_url || 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?q=80&w=1080&auto=format&fit=crop'}
               cookingTime={recipe.cooking_time ? `${recipe.cooking_time} mins` : '30 mins'}
-              level={getDifficultyLevel(recipe.difficulty)}
+              level={getCuisineLevel(recipe)}
               ingredients={getIngredientsList(recipe.ingredients)}
               onDeleted={handleRecipeDeleted}
               onView={handleViewRecipe}

@@ -149,14 +149,16 @@ export function useRecipeGeneration() {
       const recipe = generatedRecipes[selectedRecipeIndex];
       const today = new Date();
       
+      // Map difficulty based on selected cuisine level
       const difficultyMapping = {
         street: "easy",
         home: "medium",
         gourmet: "hard"
       };
       
-      const recipeDifficulty = recipe.difficulty || 
-        difficultyMapping[selectedCuisine || 'home'];
+      // For cuisine, directly use the selectedCuisine
+      // For difficulty, use recipe difficulty if available, otherwise derive from cuisine level
+      const recipeDifficulty = recipe.difficulty || difficultyMapping[selectedCuisine || 'home'];
       
       const { data: savedRecipe, error: recipeError } = await supabase
         .from('recipes')
@@ -167,7 +169,7 @@ export function useRecipeGeneration() {
           instructions: recipe.instructions,
           cooking_time: recipe.cooking_time,
           difficulty: recipeDifficulty,
-          cuisine: selectedCuisine || 'home',
+          cuisine: selectedCuisine, // Always save the explicitly selected cuisine level
           image_url: recipe.image_url || null,
           user_id: user.id
         })

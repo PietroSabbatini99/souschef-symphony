@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { ChefHat, Clock, Bookmark, Trash2, AlertCircle } from 'lucide-react';
+import { ChefHat, Clock, Bookmark, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -124,7 +125,6 @@ export function RecipeCard({
                     <AlertDialogTitle>Delete Recipe</AlertDialogTitle>
                     <AlertDialogDescription>
                       Are you sure you want to delete this recipe? This action cannot be undone.
-                      {/* Add warning about meal plans if you want */}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>

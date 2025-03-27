@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Calendar as CalendarIcon, 
@@ -130,16 +131,22 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
     fetchMealPlans();
   }, [selectedDate]);
 
-  const getDifficultyLevel = (difficulty: string, cuisine?: string): 'street' | 'home' | 'gourmet' => {
-    if (cuisine && ['street', 'home', 'gourmet'].includes(cuisine)) {
-      return cuisine as 'street' | 'home' | 'gourmet';
+  const getCuisineLevel = (recipe: MealPlan['recipe']): 'street' | 'home' | 'gourmet' => {
+    // First check if cuisine is explicitly set to one of our recognized levels
+    if (recipe.cuisine && ['street', 'home', 'gourmet'].includes(recipe.cuisine)) {
+      return recipe.cuisine as 'street' | 'home' | 'gourmet';
     }
     
-    switch (difficulty) {
-      case 'easy': return 'street';
-      case 'medium': return 'home';
-      case 'hard': return 'gourmet';
-      default: return 'home';
+    // If not, fall back to mapping from difficulty
+    switch (recipe.difficulty) {
+      case 'easy':
+        return 'street';
+      case 'medium':
+        return 'home';
+      case 'hard':
+        return 'gourmet';
+      default:
+        return 'home';
     }
   };
 
@@ -267,7 +274,7 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
               description={mealPlan.recipe.description || ''}
               imageUrl={mealPlan.recipe.image_url || 'https://images.unsplash.com/photo-1495195134817-aeb325a55b65?q=80&w=1080&auto=format&fit=crop'}
               cookingTime={mealPlan.recipe.cooking_time ? `${mealPlan.recipe.cooking_time} mins` : '30 mins'}
-              level={getDifficultyLevel(mealPlan.recipe.difficulty, mealPlan.recipe.cuisine)}
+              level={getCuisineLevel(mealPlan.recipe)}
               ingredients={getIngredientsList(mealPlan.recipe.ingredients)}
             />
           ))}
