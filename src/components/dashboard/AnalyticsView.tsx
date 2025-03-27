@@ -39,7 +39,8 @@ const mealTypesData: MealTypeDataPoint[] = [
   { name: 'Snack', count: 3 },
 ];
 
-const weeklyActivityData: ChartDataPoint[] = [
+// Weekly activity data with recipes, meals, and calories
+const weeklyActivityData = [
   { day: 'Mon', recipes: 2, meals: 3, calories: 2100 },
   { day: 'Tue', recipes: 1, meals: 2, calories: 1900 },
   { day: 'Wed', recipes: 0, meals: 3, calories: 2200 },
@@ -55,7 +56,9 @@ export function AnalyticsView() {
   const { user } = useAuth();
   const [tabView, setTabView] = useState('insights');
   const [isLoading, setIsLoading] = useState(false);
-  const [userPreferences, setUserPreferences] = useState<DietaryPreferences>({});
+  const [userPreferences, setUserPreferences] = useState<DietaryPreferences>({
+    allergens: [],
+  });
 
   // Fetch user preferences from profiles table
   useEffect(() => {
@@ -77,7 +80,7 @@ export function AnalyticsView() {
           setUserPreferences({
             dailyCalorieGoal: preferences.dailyCalorieGoal,
             weeklyCalorieGoal: preferences.weeklyCalorieGoal,
-            allergens: preferences.allergens || [],
+            allergens: Array.isArray(preferences.allergens) ? preferences.allergens : [],
           });
         }
       } catch (error) {
@@ -103,14 +106,13 @@ export function AnalyticsView() {
     try {
       // Process allergens into array
       const allergensArray = values.allergens
-        .split(',')
-        .map(item => item.trim())
-        .filter(item => item);
+        ? values.allergens.split(',').map(item => item.trim()).filter(item => item)
+        : [];
       
       // Prepare the dietary preferences object
       const dietaryPreferences: DietaryPreferences = {
-        dailyCalorieGoal: values.dailyCalorieGoal ? parseInt(values.dailyCalorieGoal) : undefined,
-        weeklyCalorieGoal: values.weeklyCalorieGoal ? parseInt(values.weeklyCalorieGoal) : undefined,
+        dailyCalorieGoal: values.dailyCalories ? parseInt(values.dailyCalories.toString()) : undefined,
+        weeklyCalorieGoal: values.weeklyCalorieGoal ? parseInt(values.weeklyCalorieGoal.toString()) : undefined,
         allergens: allergensArray,
       };
       
@@ -154,8 +156,8 @@ export function AnalyticsView() {
         <TabsContent value="insights" className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <CalorieTrackingChart 
-              data={weeklyActivityData} 
-              dailyCalorieGoal={userPreferences.dailyCalorieGoal} 
+              data={weeklyActivityData as any} 
+              dailyCalorieGoal={userPreferences.dailyCalorieGoal as number} 
             />
             
             <CuisineDistributionChart 
@@ -181,7 +183,7 @@ export function AnalyticsView() {
         </TabsContent>
       </Tabs>
       
-      <WeeklyActivityChart data={weeklyActivityData} />
+      <WeeklyActivityChart data={weeklyActivityData as any} />
     </div>
   );
 }

@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Goal, ShieldAlert, AlertCircle } from 'lucide-react';
+import { Goal, ShieldAlert } from 'lucide-react';
 import { DietaryPreferences } from './types';
 
 interface NutritionGoalsCardProps {
@@ -32,12 +32,7 @@ export const NutritionGoalsCard: React.FC<NutritionGoalsCardProps> = ({
                 {userPreferences.dailyCalorieGoal} kcal
               </Badge>
             </div>
-          ) : (
-            <div className="flex items-center text-muted-foreground">
-              <AlertCircle className="h-4 w-4 mr-2" />
-              <span className="text-sm">No daily calorie goal set</span>
-            </div>
-          )}
+          ) : null}
           
           {userPreferences.weeklyCalorieGoal ? (
             <div className="flex items-center justify-between">
@@ -46,14 +41,9 @@ export const NutritionGoalsCard: React.FC<NutritionGoalsCardProps> = ({
                 {userPreferences.weeklyCalorieGoal} kcal
               </Badge>
             </div>
-          ) : (
-            <div className="flex items-center text-muted-foreground">
-              <AlertCircle className="h-4 w-4 mr-2" />
-              <span className="text-sm">No weekly calorie goal set</span>
-            </div>
-          )}
+          ) : null}
           
-          {userPreferences.allergens && userPreferences.allergens.length > 0 ? (
+          {userPreferences.allergens && Array.isArray(userPreferences.allergens) && userPreferences.allergens.length > 0 ? (
             <div className="space-y-2">
               <span className="text-sm font-medium">Allergens to avoid:</span>
               <div className="flex flex-wrap gap-2">
@@ -65,12 +55,7 @@ export const NutritionGoalsCard: React.FC<NutritionGoalsCardProps> = ({
                 ))}
               </div>
             </div>
-          ) : (
-            <div className="flex items-center text-muted-foreground">
-              <AlertCircle className="h-4 w-4 mr-2" />
-              <span className="text-sm">No allergens specified</span>
-            </div>
-          )}
+          ) : null}
           
           <Button 
             variant="outline" 

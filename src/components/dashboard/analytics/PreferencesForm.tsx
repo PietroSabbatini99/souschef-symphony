@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
-import { Flame, Goal, ShieldAlert, Save } from 'lucide-react';
+import { Flame, Goal, ShieldAlert, Save, AlertCircle } from 'lucide-react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,13 +13,18 @@ import { DietaryPreferences, UserPreferencesFormValues } from './types';
 
 // Form schema for user preferences
 const userPreferencesSchema = z.object({
-  dailyCalorieGoal: z.string().refine(val => !val || !isNaN(Number(val)), {
+  dailyCalories: z.string().refine(val => !val || !isNaN(Number(val)), {
     message: "Calorie goal must be a number"
   }),
   weeklyCalorieGoal: z.string().refine(val => !val || !isNaN(Number(val)), {
     message: "Weekly calorie goal must be a number"
   }),
   allergens: z.string(),
+  dietaryRestrictions: z.array(z.string()).default([]),
+  cuisinePreferences: z.array(z.string()).default([]),
+  proteinGoal: z.number().default(0),
+  carbGoal: z.number().default(0),
+  fatGoal: z.number().default(0),
 });
 
 interface PreferencesFormProps {
@@ -35,9 +41,14 @@ export const PreferencesForm: React.FC<PreferencesFormProps> = ({
   const form = useForm<UserPreferencesFormValues>({
     resolver: zodResolver(userPreferencesSchema),
     defaultValues: {
-      dailyCalorieGoal: initialPreferences.dailyCalorieGoal?.toString() || '',
+      dailyCalories: initialPreferences.dailyCalorieGoal?.toString() || '',
       weeklyCalorieGoal: initialPreferences.weeklyCalorieGoal?.toString() || '',
-      allergens: (initialPreferences.allergens || []).join(', '),
+      allergens: Array.isArray(initialPreferences.allergens) ? initialPreferences.allergens.join(', ') : '',
+      dietaryRestrictions: [],
+      cuisinePreferences: [],
+      proteinGoal: 0,
+      carbGoal: 0,
+      fatGoal: 0,
     },
   });
 
@@ -52,7 +63,7 @@ export const PreferencesForm: React.FC<PreferencesFormProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
-                name="dailyCalorieGoal"
+                name="dailyCalories"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center gap-2">
@@ -118,6 +129,10 @@ export const PreferencesForm: React.FC<PreferencesFormProps> = ({
                     Add foods you're allergic to as a comma-separated list
                   </FormDescription>
                   <FormMessage />
+                  <div className="flex items-center text-muted-foreground mt-2">
+                    <AlertCircle className="h-4 w-4 mr-2" />
+                    <span className="text-sm">Missing allergens will be automatically shown in this section</span>
+                  </div>
                 </FormItem>
               )}
             />
