@@ -1,38 +1,27 @@
-
-// This might already be in the codebase. If not, this will create it.
-export interface DietaryPreferences {
-  [key: string]: boolean | string | number | null | string[] | undefined;
-  dailyCalorieGoal?: number;
-  weeklyCalorieGoal?: number;
-  allergens?: string[];
-}
-
+// Add the ChartDataPoint interface if it's not already defined
 export interface ChartDataPoint {
-  name: string;
-  value: number;
+  name?: string;
   day?: string;
-  recipes?: number;
-  meals?: number;
+  value?: number;
   calories?: number;
+  [key: string]: any;
 }
 
-export interface CuisineDataPoint {
-  name: string;
-  value: number;
-}
-
-export interface MealTypeDataPoint {
-  name: string;
-  count: number;
-}
-
-export interface UserPreferencesFormValues {
-  dailyCalories: string; // Changed from number to string to match form input
-  weeklyCalorieGoal?: string; // Changed from number to string to match form input
-  dietaryRestrictions: string[];
-  cuisinePreferences: string[];
-  proteinGoal: number;
-  carbGoal: number;
-  fatGoal: number;
-  allergens: string;
+// Ensure DietaryPreferences is properly defined as a record type
+export interface DietaryPreferences {
+  [key: string]: any;
+  vegetarian?: boolean;
+  vegan?: boolean;
+  glutenFree?: boolean;
+  dairyFree?: boolean;
+  nutFree?: boolean;
+  pescatarian?: boolean;
+  keto?: boolean;
+  paleo?: boolean;
+  lowCarb?: boolean;
+  lowFat?: boolean;
+  caloriesGoal?: number;
+  proteinGoal?: number;
+  carbsGoal?: number;
+  fatGoal?: number;
 }
