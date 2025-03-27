@@ -9,7 +9,7 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
   const { mealPlans, loading } = useMealPlans(selectedDate);
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
+    <div className="w-full max-w-3xl mx-auto px-4">
       <WeekCalendar 
         selectedDate={selectedDate}
         onDateChange={onDateChange}

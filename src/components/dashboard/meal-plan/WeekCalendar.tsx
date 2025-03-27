@@ -58,8 +58,8 @@ export function WeekCalendar({ selectedDate, onDateChange }: WeekCalendarProps) 
 
   return (
     <>
-      <div className="flex justify-center mb-6">
-        <div className="flex items-center mt-4 md:mt-0">
+      <div className="flex justify-center items-center mb-6 w-full">
+        <div className="flex items-center justify-center mt-4 md:mt-0">
           <Button variant="outline" size="icon" onClick={previousWeek}>
             <ChevronLeft size={18} />
           </Button>
@@ -87,6 +87,7 @@ export function WeekCalendar({ selectedDate, onDateChange }: WeekCalendarProps) 
                   }
                 }}
                 initialFocus
+                className="pointer-events-auto"
               />
             </PopoverContent>
           </Popover>
@@ -97,7 +98,7 @@ export function WeekCalendar({ selectedDate, onDateChange }: WeekCalendarProps) 
         </div>
       </div>
       
-      <div className="grid grid-cols-7 gap-1 mb-8 mx-auto max-w-3xl">
+      <div className="grid grid-cols-7 gap-1 mb-8 w-full">
         {weekDays.map((date, index) => (
           <button
             key={index}
