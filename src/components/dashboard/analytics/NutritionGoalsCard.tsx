@@ -4,12 +4,7 @@ import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Goal, ShieldAlert, AlertCircle } from 'lucide-react';
-
-interface DietaryPreferences {
-  dailyCalorieGoal?: number;
-  weeklyCalorieGoal?: number;
-  allergens?: string[];
-}
+import { DietaryPreferences } from './types';
 
 interface NutritionGoalsCardProps {
   userPreferences: DietaryPreferences;
