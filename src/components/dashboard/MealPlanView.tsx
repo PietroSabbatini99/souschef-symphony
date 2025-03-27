@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Calendar as CalendarIcon, 
-  Clock, 
   ChevronLeft, 
   ChevronRight,
-  PlusCircle,
   Calendar as CalendarComponent
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -132,10 +130,6 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
     fetchMealPlans();
   }, [selectedDate]);
 
-  const handleAddMeal = () => {
-    toast.info('Meal plan creation will be added in the next phase!');
-  };
-  
   const getDifficultyLevel = (difficulty: string, cuisine?: string): 'street' | 'home' | 'gourmet' => {
     if (cuisine && ['street', 'home', 'gourmet'].includes(cuisine)) {
       return cuisine as 'street' | 'home' | 'gourmet';
@@ -242,14 +236,10 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
         ))}
       </div>
       
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4">
         <h3 className="text-xl font-semibold">
           {format(selectedDate, 'EEEE, MMMM d')} Meals
         </h3>
-        <Button variant="outline" size="sm" className="gap-1" onClick={handleAddMeal}>
-          <PlusCircle size={16} />
-          Add Meal
-        </Button>
       </div>
       
       {loading ? (
@@ -287,10 +277,6 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
           <CalendarComponent size={48} className="mx-auto text-gray-300 mb-3" />
           <h3 className="text-xl font-semibold text-gray-600 mb-2">No meals planned</h3>
           <p className="text-gray-500 mb-6">Add meals to your calendar for this day</p>
-          <Button onClick={handleAddMeal} className="bg-souschef-red hover:bg-souschef-red-light text-white">
-            <PlusCircle size={18} className="mr-2" />
-            Add Meal Plan
-          </Button>
         </div>
       )}
     </div>
