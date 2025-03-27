@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/button';
 import { 
   Calendar, 
   ChefHat, 
-  Home, 
-  User,
+  Home,
   BarChart
 } from 'lucide-react';
 
@@ -49,14 +48,6 @@ export function BottomNavigation({ activeTab, setActiveTab }: BottomNavigationPr
         >
           <BarChart size={24} />
           <span className="text-xs font-medium">Analytics</span>
-        </Button>
-        <Button 
-          variant="ghost" 
-          className={`text-gray-500 flex flex-col gap-1 h-auto py-2 ${activeTab === 'account' ? 'text-souschef-red' : ''}`} 
-          onClick={() => setActiveTab('account')}
-        >
-          <User size={24} />
-          <span className="text-xs font-medium">Account</span>
         </Button>
       </div>
     </div>
