@@ -31,6 +31,7 @@ export interface GeneratedRecipe {
   image_prompt: string;
   image_url?: string;
   meal_type: string;
+  calories_per_serving?: number;
 }
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
@@ -104,6 +105,11 @@ export function RecipeDialog({
               <Badge variant="outline" className="flex items-center gap-1.5">
                 {getMealTypeIcon(selectedRecipe.meal_type as MealType)} {selectedRecipe.meal_type}
               </Badge>
+              {selectedRecipe.calories_per_serving !== undefined && (
+                <Badge variant="outline" className="flex items-center gap-1.5">
+                  <Flame size={14} /> {selectedRecipe.calories_per_serving} cal
+                </Badge>
+              )}
             </div>
 
             {Object.keys(recipesByMealType).length > 0 && (
