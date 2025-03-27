@@ -52,13 +52,23 @@ export function useAnalyticsData() {
         if (error) throw error;
         
         if (data && data.dietary_preferences) {
-          const preferences = data.dietary_preferences as DietaryPreferences;
-          
-          setUserPreferences({
-            dailyCalorieGoal: preferences.dailyCalorieGoal,
-            weeklyCalorieGoal: preferences.weeklyCalorieGoal,
-            allergens: Array.isArray(preferences.allergens) ? preferences.allergens : [],
-          });
+          // Convert from string[] to DietaryPreferences object if needed
+          if (Array.isArray(data.dietary_preferences)) {
+            console.log('Received array data, converting to object');
+            // Handle old format (array) - convert to object
+            setUserPreferences({
+              allergens: data.dietary_preferences as string[]
+            });
+          } else {
+            // Already in object format
+            const preferences = data.dietary_preferences as DietaryPreferences;
+            
+            setUserPreferences({
+              dailyCalorieGoal: preferences.dailyCalorieGoal,
+              weeklyCalorieGoal: preferences.weeklyCalorieGoal,
+              allergens: Array.isArray(preferences.allergens) ? preferences.allergens : [],
+            });
+          }
         }
       } catch (error) {
         console.error('Error fetching user preferences:', error);
@@ -166,15 +176,19 @@ export function useAnalyticsData() {
       
       console.log('Saving preferences:', dietaryPreferences);
       
-      // Update the profile
+      // Update the profile - convert object to JSON string for storage
+      // This is necessary because Supabase expects dietary_preferences to be stored as JSON
       const { error } = await supabase
         .from('profiles')
         .update({
-          dietary_preferences: dietaryPreferences,
+          dietary_preferences: dietaryPreferences, // Store as JSON object, not as string[]
         })
         .eq('id', user.id);
         
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
       
       // Update local state
       setUserPreferences(dietaryPreferences);
