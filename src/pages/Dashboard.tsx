@@ -211,9 +211,16 @@ const Dashboard = () => {
             <Button 
               variant="ghost" 
               className="w-full justify-start text-gray-600"
-              onClick={handleSignOut}
+              onClick={async () => {
+                try {
+                  await useAuth().signOut();
+                  toast.success("Signed out successfully");
+                } catch (error) {
+                  toast.error("Failed to sign out");
+                }
+              }}
             >
-              <LogOut size={16} className="mr-2" />
+              <Settings size={16} className="mr-2" />
               Logout
             </Button>
           </SidebarFooter>
