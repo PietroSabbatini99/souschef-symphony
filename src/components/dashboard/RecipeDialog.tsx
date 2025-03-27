@@ -107,7 +107,7 @@ export function RecipeDialog({
               </Badge>
               {selectedRecipe.calories_per_serving !== undefined && (
                 <Badge variant="outline" className="flex items-center gap-1.5">
-                  <Flame size={14} /> {selectedRecipe.calories_per_serving} cal
+                  <Flame size={14} /> {selectedRecipe.calories_per_serving} kcal
                 </Badge>
               )}
             </div>
