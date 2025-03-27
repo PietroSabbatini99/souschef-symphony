@@ -160,6 +160,17 @@ export function RecipeCreator() {
       const recipe = generatedRecipes[selectedRecipeIndex];
       const today = new Date();
       
+      // Map cuisine level to difficulty if not already provided in recipe
+      const difficultyMapping = {
+        street: "easy",
+        home: "medium",
+        gourmet: "hard"
+      };
+      
+      // Use either the recipe's difficulty or map from selected cuisine level
+      const recipeDifficulty = recipe.difficulty || 
+        difficultyMapping[selectedCuisine || 'home'];
+      
       // Save recipe directly to the database
       const { data: savedRecipe, error: recipeError } = await supabase
         .from('recipes')
@@ -169,7 +180,8 @@ export function RecipeCreator() {
           ingredients: recipe.ingredients,
           instructions: recipe.instructions,
           cooking_time: recipe.cooking_time,
-          difficulty: recipe.difficulty,
+          difficulty: recipeDifficulty,
+          cuisine: selectedCuisine || 'home', // Store the selected cuisine level
           image_url: recipe.image_url || null,
           user_id: user.id
         })

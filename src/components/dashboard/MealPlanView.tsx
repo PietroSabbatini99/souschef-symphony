@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Calendar as CalendarIcon, 
@@ -35,6 +34,7 @@ interface MealPlan {
     image_url: string;
     cooking_time: number;
     difficulty: string;
+    cuisine: string;
     ingredients: Json;
   };
 }
@@ -112,6 +112,7 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
               image_url,
               cooking_time,
               difficulty,
+              cuisine,
               ingredients
             )
           `)
@@ -135,7 +136,11 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
     toast.info('Meal plan creation will be added in the next phase!');
   };
   
-  const getDifficultyLevel = (difficulty: string): 'street' | 'home' | 'gourmet' => {
+  const getDifficultyLevel = (difficulty: string, cuisine?: string): 'street' | 'home' | 'gourmet' => {
+    if (cuisine && ['street', 'home', 'gourmet'].includes(cuisine)) {
+      return cuisine as 'street' | 'home' | 'gourmet';
+    }
+    
     switch (difficulty) {
       case 'easy': return 'street';
       case 'medium': return 'home';
@@ -270,9 +275,9 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
               id={mealPlan.recipe.id}
               title={`${mealPlan.meal_type.charAt(0).toUpperCase() + mealPlan.meal_type.slice(1)}: ${mealPlan.recipe.title}`}
               description={mealPlan.recipe.description || ''}
-              imageUrl={mealPlan.recipe.image_url || 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?q=80&w=1080&auto=format&fit=crop'}
+              imageUrl={mealPlan.recipe.image_url || 'https://images.unsplash.com/photo-1495195134817-aeb325a55b65?q=80&w=1080&auto=format&fit=crop'}
               cookingTime={mealPlan.recipe.cooking_time ? `${mealPlan.recipe.cooking_time} mins` : '30 mins'}
-              level={getDifficultyLevel(mealPlan.recipe.difficulty)}
+              level={getDifficultyLevel(mealPlan.recipe.difficulty, mealPlan.recipe.cuisine)}
               ingredients={getIngredientsList(mealPlan.recipe.ingredients)}
             />
           ))}
