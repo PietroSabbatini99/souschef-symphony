@@ -59,8 +59,6 @@ export function WeekCalendar({ selectedDate, onDateChange }: WeekCalendarProps) 
   return (
     <>
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
-        <h2 className="text-2xl md:text-3xl font-bold">Meal Plan</h2>
-        
         <div className="flex items-center mt-4 md:mt-0">
           <Button variant="outline" size="icon" onClick={previousWeek}>
             <ChevronLeft size={18} />
