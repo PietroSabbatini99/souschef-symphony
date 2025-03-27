@@ -62,6 +62,16 @@ serve(async (req) => {
         dietaryConstraints += ` Strictly avoid the following allergens: ${dietaryPreferences.allergens.join(", ")}.`;
       }
 
+      // Realistic calorie ranges based on meal type
+      const calorieGuidelines = {
+        breakfast: "Breakfast dishes typically range from 300-500 calories per serving",
+        lunch: "Lunch dishes typically range from 400-700 calories per serving",
+        dinner: "Dinner dishes typically range from 500-800 calories per serving",
+        snack: "Snacks typically range from 100-300 calories per serving"
+      };
+
+      const calorieGuideline = calorieGuidelines[mealType] || "Aim for a realistic calorie count based on ingredients and portion size";
+
       // Construct recipe generation prompt for this meal type
       const systemPrompt = `You are a professional chef specialized in creating ${styleDescription} recipes. Generate a ${mealType} recipe ${promptIngredients}.${dietaryConstraints}
 
@@ -70,7 +80,7 @@ For the recipe name:
 - If cuisine level is "home": Create a straightforward, approachable name
 - If cuisine level is "gourmet": Create an elegant, sophisticated name
 
-Important: ALWAYS include an accurate calories_per_serving estimate for the recipe.
+IMPORTANT NUTRITION GUIDELINES: ${calorieGuideline}. Calculate calories based on standard nutritional values of ingredients. Be precise and realistic with calorie calculations - do not underestimate or overestimate.
 
 Provide the following JSON structure:
 {
@@ -82,7 +92,7 @@ Provide the following JSON structure:
   "difficulty": "easy", "medium", or "hard" based on complexity,
   "image_prompt": "A detailed description for generating an image of this dish",
   "meal_type": "${mealType}",
-  "calories_per_serving": approximate calories per serving (number only)
+  "calories_per_serving": realistic calories per serving (number only)
 }`;
 
       console.log(`Sending request to OpenAI for ${mealType} recipe`);
@@ -97,7 +107,7 @@ Provide the following JSON structure:
           model: 'gpt-4o',
           messages: [
             { role: 'system', content: systemPrompt },
-            { role: 'user', content: `Create a ${cuisineLevel} ${mealType} recipe ${promptIngredients}${dietaryConstraints}. Be sure to include an accurate calories_per_serving value.` }
+            { role: 'user', content: `Create a ${cuisineLevel} ${mealType} recipe ${promptIngredients}${dietaryConstraints}. Be accurate and realistic with calorie calculations.` }
           ],
           temperature: 0.7,
         }),
@@ -133,19 +143,47 @@ Provide the following JSON structure:
           // Ensure the meal_type is included in the recipe
           recipe.meal_type = mealType;
           
-          // Ensure there's a calories_per_serving field
+          // Ensure there's a realistic calories_per_serving field
           if (!recipe.calories_per_serving || isNaN(Number(recipe.calories_per_serving))) {
             // Default fallback based on meal type if missing
             const defaultCalories = {
               breakfast: 400,
               lunch: 600,
-              dinner: 800,
+              dinner: 700,
               snack: 200
             };
             recipe.calories_per_serving = defaultCalories[mealType] || 500;
           } else {
             // Ensure it's a number
             recipe.calories_per_serving = Number(recipe.calories_per_serving);
+            
+            // Check if the calorie count seems unrealistic and adjust if needed
+            const maxCaloriesByMealType = {
+              breakfast: 800,
+              lunch: 1000, 
+              dinner: 1200,
+              snack: 500
+            };
+            
+            const minCaloriesByMealType = {
+              breakfast: 200,
+              lunch: 300,
+              dinner: 400,
+              snack: 50
+            };
+            
+            const maxCalories = maxCaloriesByMealType[mealType] || 1000;
+            const minCalories = minCaloriesByMealType[mealType] || 200;
+            
+            if (recipe.calories_per_serving > maxCalories) {
+              console.log(`Adjusting unrealistically high calorie count from ${recipe.calories_per_serving} to ${maxCalories}`);
+              recipe.calories_per_serving = maxCalories;
+            }
+            
+            if (recipe.calories_per_serving < minCalories) {
+              console.log(`Adjusting unrealistically low calorie count from ${recipe.calories_per_serving} to ${minCalories}`);
+              recipe.calories_per_serving = minCalories;
+            }
           }
           
           allRecipes.push(recipe);
