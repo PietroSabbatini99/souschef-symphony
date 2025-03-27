@@ -13,18 +13,13 @@ import { DietaryPreferences, UserPreferencesFormValues } from './types';
 
 // Form schema for user preferences
 const userPreferencesSchema = z.object({
-  dailyCalories: z.string().refine(val => !val || !isNaN(Number(val)), {
+  dailyCalories: z.string().optional().refine(val => !val || !isNaN(Number(val)), {
     message: "Calorie goal must be a number"
   }),
-  weeklyCalorieGoal: z.string().refine(val => !val || !isNaN(Number(val)), {
+  weeklyCalorieGoal: z.string().optional().refine(val => !val || !isNaN(Number(val)), {
     message: "Weekly calorie goal must be a number"
   }),
-  allergens: z.string(),
-  dietaryRestrictions: z.array(z.string()).default([]),
-  cuisinePreferences: z.array(z.string()).default([]),
-  proteinGoal: z.number().default(0),
-  carbGoal: z.number().default(0),
-  fatGoal: z.number().default(0),
+  allergens: z.string().optional(),
 });
 
 interface PreferencesFormProps {
@@ -44,11 +39,6 @@ export const PreferencesForm: React.FC<PreferencesFormProps> = ({
       dailyCalories: initialPreferences.dailyCalorieGoal?.toString() || '',
       weeklyCalorieGoal: initialPreferences.weeklyCalorieGoal?.toString() || '',
       allergens: Array.isArray(initialPreferences.allergens) ? initialPreferences.allergens.join(', ') : '',
-      dietaryRestrictions: [],
-      cuisinePreferences: [],
-      proteinGoal: 0,
-      carbGoal: 0,
-      fatGoal: 0,
     },
   });
 

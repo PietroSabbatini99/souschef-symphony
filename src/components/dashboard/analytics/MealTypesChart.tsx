@@ -2,15 +2,19 @@
 import React from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
+import { MealTypeDataPoint } from './types';
 
 interface MealTypesChartProps {
-  data: Array<{
-    name: string;
-    count: number;
-  }>;
+  data: MealTypeDataPoint[];
 }
 
 export const MealTypesChart: React.FC<MealTypesChartProps> = ({ data }) => {
+  // Transform data to ensure it has the correct format for the chart
+  const chartData = data.map(item => ({
+    name: item.name,
+    count: item.count || item.value || 0
+  }));
+
   return (
     <Card>
       <CardHeader>
@@ -19,7 +23,7 @@ export const MealTypesChart: React.FC<MealTypesChartProps> = ({ data }) => {
       <CardContent className="h-72">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
-            data={data}
+            data={chartData}
             margin={{
               top: 20,
               right: 30,
