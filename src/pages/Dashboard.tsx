@@ -14,7 +14,8 @@ import {
   Home, 
   User,
   MessageSquare,
-  BarChart
+  BarChart,
+  Menu
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
@@ -125,7 +126,9 @@ const Dashboard = () => {
         <SidebarInset>
           <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sticky top-0 z-10">
             <div className="flex items-center gap-2">
-              <SidebarTrigger className="md:hidden" />
+              <SidebarTrigger className="md:hidden">
+                <Menu size={20} />
+              </SidebarTrigger>
               <h1 className="text-xl font-bold hidden md:block">
                 {activeTab === 'calendar' && 'Meal Calendar'}
                 {activeTab === 'recipes' && 'My Recipes'}
