@@ -164,6 +164,8 @@ export function useAnalyticsData() {
         allergens: allergensArray,
       };
       
+      console.log('Saving preferences:', dietaryPreferences);
+      
       // Update the profile
       const { error } = await supabase
         .from('profiles')
