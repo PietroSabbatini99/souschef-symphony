@@ -24,7 +24,7 @@ const Dashboard = () => {
         {/* Main Content */}
         <SidebarInset className="flex-grow overflow-hidden flex flex-col">
           {/* Page Title */}
-          <DashboardHeader activeTab={activeTab} />
+          <DashboardHeader activeTab={activeTab} setActiveTab={setActiveTab} />
           
           {/* Content Area */}
           <main className="p-4 md:p-6 overflow-auto flex-grow pb-24">
