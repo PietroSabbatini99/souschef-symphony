@@ -116,7 +116,11 @@ export function useRecipeGeneration() {
         throw new Error(response.error.message);
       }
 
-      if (!response.data.recipes || response.data.recipes.length === 0) {
+      if (!response.data || !response.data.recipes) {
+        throw new Error("No recipes were returned from the server");
+      }
+
+      if (response.data.recipes.length === 0) {
         throw new Error("No recipes were generated");
       }
 

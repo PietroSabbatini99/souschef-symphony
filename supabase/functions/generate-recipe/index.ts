@@ -21,7 +21,7 @@ serve(async (req) => {
       ingredients = {},
       mealTypes = ["dinner"],
       count = 1,
-      dietaryPreferences = {} // Parameter for dietary preferences
+      dietaryPreferences = {}
     } = await req.json();
 
     if (!cuisineLevel) {
@@ -46,12 +46,7 @@ serve(async (req) => {
       
       let mealIngredients = ingredients[mealType] || [];
       
-      // Skip empty meal types with no ingredients
-      if (mealIngredients.length === 0 && Object.keys(ingredients).length > 0) {
-        console.log(`Skipping ${mealType} as it has no ingredients`);
-        continue;
-      }
-      
+      // Always generate a recipe, even if no specific ingredients are provided
       let promptIngredients = "using common ingredients";
       if (mealIngredients.length > 0) {
         promptIngredients = `using the following ingredients: ${mealIngredients.join(", ")}`;
@@ -141,6 +136,11 @@ Provide the following JSON structure:
         console.error(`Error parsing OpenAI response for ${mealType}:`, parseError);
         throw new Error(`Failed to parse recipe data from OpenAI response for ${mealType}`);
       }
+    }
+
+    // Make sure we have at least one recipe
+    if (allRecipes.length === 0) {
+      throw new Error("Failed to generate any recipes. Please try again.");
     }
 
     return new Response(JSON.stringify({ recipes: allRecipes }), {
