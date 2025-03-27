@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.21.0';
@@ -74,6 +73,7 @@ serve(async (req) => {
       difficulty: recipe.difficulty,
       image_url: recipe.image_url || null,
       user_id: user.id,
+      calories_per_serving: recipe.calories_per_serving || null,
     };
 
     console.log("Saving recipe:", recipeInsertData.title);

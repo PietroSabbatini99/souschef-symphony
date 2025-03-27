@@ -72,7 +72,8 @@ export function useRecipeGeneration() {
         if (error) throw error;
         
         if (data && data.dietary_preferences) {
-          setUserPreferences(data.dietary_preferences as DietaryPreferences);
+          const prefs = data.dietary_preferences as DietaryPreferences;
+          setUserPreferences(prefs);
         }
       } catch (error) {
         console.error('Error fetching user preferences:', error);
@@ -160,6 +161,9 @@ export function useRecipeGeneration() {
       // For difficulty, use recipe difficulty if available, otherwise derive from cuisine level
       const recipeDifficulty = recipe.difficulty || difficultyMapping[selectedCuisine || 'home'];
       
+      // Extract calories_per_serving from the recipe if available
+      const caloriesPerServing = recipe.calories_per_serving || 0;
+      
       const { data: savedRecipe, error: recipeError } = await supabase
         .from('recipes')
         .insert({
@@ -171,7 +175,8 @@ export function useRecipeGeneration() {
           difficulty: recipeDifficulty,
           cuisine: selectedCuisine, // Always save the explicitly selected cuisine level
           image_url: recipe.image_url || null,
-          user_id: user.id
+          user_id: user.id,
+          calories_per_serving: caloriesPerServing  // Save calories per serving
         })
         .select()
         .single();

@@ -27,12 +27,12 @@ export interface MealTypeDataPoint {
 }
 
 export interface UserPreferencesFormValues {
-  dailyCalories: number;
-  weeklyCalorieGoal?: number;
+  dailyCalories: string; // Changed from number to string to match form input
+  weeklyCalorieGoal?: string; // Changed from number to string to match form input
   dietaryRestrictions: string[];
   cuisinePreferences: string[];
   proteinGoal: number;
   carbGoal: number;
   fatGoal: number;
-  allergens?: string;
+  allergens: string;
 }

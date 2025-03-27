@@ -16,7 +16,8 @@ import {
   Save, 
   Coffee,
   Utensils,
-  Loader2
+  Loader2,
+  Flame
 } from 'lucide-react';
 import { CuisineLevel } from '@/components/dashboard/CuisineSelector';
 

@@ -70,6 +70,8 @@ For the recipe name:
 - If cuisine level is "home": Create a straightforward, approachable name
 - If cuisine level is "gourmet": Create an elegant, sophisticated name
 
+Important: ALWAYS include an accurate calories_per_serving estimate for the recipe.
+
 Provide the following JSON structure:
 {
   "title": "Recipe Title",
@@ -95,7 +97,7 @@ Provide the following JSON structure:
           model: 'gpt-4o',
           messages: [
             { role: 'system', content: systemPrompt },
-            { role: 'user', content: `Create a ${cuisineLevel} ${mealType} recipe ${promptIngredients}${dietaryConstraints}.` }
+            { role: 'user', content: `Create a ${cuisineLevel} ${mealType} recipe ${promptIngredients}${dietaryConstraints}. Be sure to include an accurate calories_per_serving value.` }
           ],
           temperature: 0.7,
         }),
@@ -130,6 +132,22 @@ Provide the following JSON structure:
         if (recipe) {
           // Ensure the meal_type is included in the recipe
           recipe.meal_type = mealType;
+          
+          // Ensure there's a calories_per_serving field
+          if (!recipe.calories_per_serving || isNaN(Number(recipe.calories_per_serving))) {
+            // Default fallback based on meal type if missing
+            const defaultCalories = {
+              breakfast: 400,
+              lunch: 600,
+              dinner: 800,
+              snack: 200
+            };
+            recipe.calories_per_serving = defaultCalories[mealType] || 500;
+          } else {
+            // Ensure it's a number
+            recipe.calories_per_serving = Number(recipe.calories_per_serving);
+          }
+          
           allRecipes.push(recipe);
         }
       } catch (parseError) {
