@@ -34,7 +34,7 @@ const Dashboard = () => {
           <DashboardHeader activeTab={activeTab} setActiveTab={setActiveTab} />
           
           {/* Content Area */}
-          <main className="overflow-auto flex-grow pb-20 md:pb-6 w-full max-w-[1200px] mx-auto">
+          <main className="overflow-auto flex-grow pb-20 md:pb-6 w-full max-w-[1200px] mx-auto px-4 md:px-8">
             {activeTab === 'calendar' && (
               <MealPlanView 
                 selectedDate={selectedDate}
