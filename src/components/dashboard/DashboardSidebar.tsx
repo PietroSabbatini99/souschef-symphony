@@ -7,7 +7,8 @@ import {
   Settings, 
   ChefHat, 
   Home, 
-  BarChart
+  BarChart,
+  LogOut
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
@@ -103,7 +104,7 @@ export function DashboardSidebar({ activeTab, setActiveTab }: DashboardSidebarPr
           className="w-full justify-start text-gray-600"
           onClick={handleSignOut}
         >
-          <Settings size={16} className="mr-2" />
+          <LogOut size={16} className="mr-2" />
           Logout
         </Button>
       </SidebarFooter>
