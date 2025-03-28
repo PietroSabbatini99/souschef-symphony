@@ -18,19 +18,21 @@ export function AccountView() {
   };
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow">
-      {user && (
-        <div className="mb-6">
-          <p className="text-gray-600">Email: {user.email}</p>
-        </div>
-      )}
-      <Button 
-        variant="destructive" 
-        onClick={handleSignOut}
-        className="mt-4"
-      >
-        Log Out
-      </Button>
+    <div className="max-w-4xl mx-auto">
+      <div className="p-4 bg-white rounded-lg shadow">
+        {user && (
+          <div className="mb-6">
+            <p className="text-gray-600">Email: {user.email}</p>
+          </div>
+        )}
+        <Button 
+          variant="destructive" 
+          onClick={handleSignOut}
+          className="mt-4"
+        >
+          Log Out
+        </Button>
+      </div>
     </div>
   );
 }

@@ -11,19 +11,17 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
   const isMobile = useIsMobile();
 
   return (
-    <div className="flex justify-center w-full">
-      <div className={`w-full ${isMobile ? 'max-w-3xl' : 'max-w-5xl'} px-4`}>
-        <WeekCalendar 
-          selectedDate={selectedDate}
-          onDateChange={onDateChange}
-        />
-        
-        <MealPlanContent
-          selectedDate={selectedDate}
-          mealPlans={mealPlans}
-          loading={loading}
-        />
-      </div>
+    <div className="max-w-4xl mx-auto">
+      <WeekCalendar 
+        selectedDate={selectedDate}
+        onDateChange={onDateChange}
+      />
+      
+      <MealPlanContent
+        selectedDate={selectedDate}
+        mealPlans={mealPlans}
+        loading={loading}
+      />
     </div>
   );
 }
