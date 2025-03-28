@@ -4,12 +4,14 @@ import { MealPlanViewProps } from './meal-plan/types';
 import { WeekCalendar } from './meal-plan/WeekCalendar';
 import { MealPlanContent } from './meal-plan/MealPlanContent';
 import { useMealPlans } from './meal-plan/useMealPlans';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) {
   const { mealPlans, loading } = useMealPlans(selectedDate);
+  const isMobile = useIsMobile();
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-4">
+    <div className={`w-full ${isMobile ? 'max-w-3xl' : 'max-w-5xl'} mx-auto px-4`}>
       <WeekCalendar 
         selectedDate={selectedDate}
         onDateChange={onDateChange}

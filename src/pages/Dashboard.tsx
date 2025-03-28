@@ -8,6 +8,7 @@ import { AccountView } from '@/components/dashboard/AccountView';
 import { BottomNavigation } from '@/components/dashboard/BottomNavigation';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   SidebarProvider,
   Sidebar,
@@ -17,17 +18,23 @@ import {
 const Dashboard = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [activeTab, setActiveTab] = useState<'calendar' | 'recipes' | 'create' | 'analytics' | 'account'>('calendar');
+  const isMobile = useIsMobile();
 
   return (
-    <SidebarProvider defaultOpen={false}>
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+    <SidebarProvider defaultOpen={!isMobile}>
+      <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+        {/* Sidebar - hidden on mobile, visible on desktop */}
+        <Sidebar variant="floating" collapsible={isMobile ? "offcanvas" : "icon"} className="hidden md:block">
+          <DashboardSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        </Sidebar>
+        
         {/* Main Content */}
         <SidebarInset className="flex-grow overflow-hidden flex flex-col">
           {/* Page Title */}
           <DashboardHeader activeTab={activeTab} setActiveTab={setActiveTab} />
           
           {/* Content Area */}
-          <main className="p-4 md:p-6 overflow-auto flex-grow pb-24">
+          <main className="p-4 md:p-6 overflow-auto flex-grow pb-24 md:pb-6">
             {activeTab === 'calendar' && (
               <MealPlanView 
                 selectedDate={selectedDate}
@@ -53,13 +60,8 @@ const Dashboard = () => {
           </main>
         </SidebarInset>
         
-        {/* Bottom Navigation Bar */}
+        {/* Bottom Navigation Bar - only visible on mobile */}
         <BottomNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
-        
-        {/* Sidebar - kept for reference but not visible on mobile */}
-        <Sidebar variant="floating" collapsible="offcanvas" className="hidden">
-          <DashboardSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-        </Sidebar>
       </div>
     </SidebarProvider>
   );
