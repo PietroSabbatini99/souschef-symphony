@@ -41,13 +41,65 @@ export function Hero() {
           </div>
           
           {/* App Preview */}
-          <div className="relative w-full max-w-4xl mx-auto rounded-xl overflow-hidden shadow-2xl animate-fade-up glass-card" style={{ animationDelay: '400ms' }}>
-            <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-              <img 
-                src="https://images.unsplash.com/photo-1597226051223-a3bdb3bf6b7a?q=80&w=1780&auto=format&fit=crop&ixlib=rb-4.0.3" 
-                alt="SousChef App Interface" 
-                className="w-full h-full object-cover" 
-              />
+          <div className="relative w-full max-w-4xl mx-auto rounded-xl overflow-hidden shadow-2xl animate-fade-up" style={{ animationDelay: '400ms' }}>
+            <div className="aspect-video bg-white rounded-lg overflow-hidden">
+              {/* App Interface Mockup */}
+              <div className="relative w-full h-full">
+                {/* Mock Header */}
+                <div className="bg-souschef-red text-white p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ChefHat size={20} />
+                    <span className="font-medium">SousChef</span>
+                  </div>
+                  <div className="w-8 h-8 bg-white/20 rounded-full"></div>
+                </div>
+                
+                {/* Mock Content */}
+                <div className="p-6">
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold mb-2">Today's Meal Plan</h3>
+                    <div className="grid grid-cols-3 gap-4">
+                      {/* Breakfast Card */}
+                      <div className="bg-gray-50 rounded-lg p-3 shadow-sm">
+                        <div className="h-20 bg-gray-200 rounded mb-2"></div>
+                        <p className="text-xs font-medium text-souschef-red">Breakfast</p>
+                        <p className="text-sm font-medium">Avocado Toast</p>
+                      </div>
+                      
+                      {/* Lunch Card */}
+                      <div className="bg-gray-50 rounded-lg p-3 shadow-sm">
+                        <div className="h-20 bg-gray-200 rounded mb-2"></div>
+                        <p className="text-xs font-medium text-souschef-red">Lunch</p>
+                        <p className="text-sm font-medium">Quinoa Salad</p>
+                      </div>
+                      
+                      {/* Dinner Card */}
+                      <div className="bg-gray-50 rounded-lg p-3 shadow-sm">
+                        <div className="h-20 bg-gray-200 rounded mb-2"></div>
+                        <p className="text-xs font-medium text-souschef-red">Dinner</p>
+                        <p className="text-sm font-medium">Grilled Salmon</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Calendar Strip */}
+                  <div className="flex justify-between mb-6">
+                    {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
+                      <div key={i} className={`w-10 h-10 rounded-full flex items-center justify-center text-sm ${i === 2 ? 'bg-souschef-red text-white' : 'bg-gray-100'}`}>
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Action Buttons */}
+                  <div className="flex gap-2">
+                    <div className="bg-souschef-red text-white text-sm py-2 px-4 rounded-lg flex-1 text-center">Generate New Plan</div>
+                    <div className="bg-gray-100 text-gray-800 text-sm py-2 px-4 rounded-lg flex-1 text-center">View Recipes</div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Overlay Text */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end justify-center pb-6">
                 <div className="bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 text-gray-800 font-medium text-sm">
                   Experience SousChef on any device
