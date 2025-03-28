@@ -16,7 +16,7 @@ interface MealPlanContentProps {
 export function MealPlanContent({ selectedDate, mealPlans, loading }: MealPlanContentProps) {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-6">
         {[1, 2, 3].map((i) => (
           <div key={i} className="rounded-lg overflow-hidden border border-gray-200">
             <Skeleton className="w-full h-48" />
@@ -34,7 +34,7 @@ export function MealPlanContent({ selectedDate, mealPlans, loading }: MealPlanCo
   }
 
   return (
-    <div className="w-full px-4">
+    <div className="w-full px-6">
       {mealPlans.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {mealPlans.map((mealPlan) => (
