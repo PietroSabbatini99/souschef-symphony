@@ -28,7 +28,7 @@ export function BottomNavigation({ activeTab, setActiveTab }: BottomNavigationPr
           onClick={() => setActiveTab('calendar')}
         >
           <Calendar size={24} />
-          <span className="text-xs font-medium">Calendar</span>
+          <span className="text-[10px] font-medium">Calendar</span>
         </Button>
         <Button 
           variant="ghost" 
@@ -36,7 +36,7 @@ export function BottomNavigation({ activeTab, setActiveTab }: BottomNavigationPr
           onClick={() => setActiveTab('recipes')}
         >
           <Home size={24} />
-          <span className="text-xs font-medium">Recipes</span>
+          <span className="text-[10px] font-medium">Recipes</span>
         </Button>
         <Button 
           variant="ghost" 
@@ -44,7 +44,7 @@ export function BottomNavigation({ activeTab, setActiveTab }: BottomNavigationPr
           onClick={() => setActiveTab('create')}
         >
           <ChefHat size={24} />
-          <span className="text-xs font-medium">Generate</span>
+          <span className="text-[10px] font-medium">Generate</span>
         </Button>
         <Button 
           variant="ghost" 
@@ -52,7 +52,7 @@ export function BottomNavigation({ activeTab, setActiveTab }: BottomNavigationPr
           onClick={() => setActiveTab('analytics')}
         >
           <BarChart size={24} />
-          <span className="text-xs font-medium">Analytics</span>
+          <span className="text-[10px] font-medium">Analytics</span>
         </Button>
       </div>
     </div>

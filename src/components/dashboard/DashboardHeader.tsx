@@ -13,7 +13,7 @@ export function DashboardHeader({ activeTab, setActiveTab }: DashboardHeaderProp
   const { user } = useAuth();
   
   return (
-    <header className="h-16 bg-white flex items-center justify-between px-6 md:px-8 sticky top-0 z-10 shadow-sm">
+    <header className="h-16 bg-white flex items-center justify-between px-6 md:px-8 sticky top-0 z-10">
       <div className="flex items-center gap-2 max-w-[1200px] w-full mx-auto">
         <h1 className="text-2xl md:text-3xl font-bold">
           {activeTab === 'calendar' && 'Meal Calendar'}
