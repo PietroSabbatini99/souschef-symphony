@@ -58,7 +58,7 @@ export function WeekCalendar({ selectedDate, onDateChange }: WeekCalendarProps) 
 
   return (
     <div className="w-full mb-6">
-      <div className="flex justify-between items-center mb-4 px-6">
+      <div className="flex justify-between items-center mb-4 px-4 sm:px-6">
         <Button variant="outline" size="icon" onClick={previousWeek} className="h-10 w-10">
           <ChevronLeft size={18} />
         </Button>
@@ -96,7 +96,7 @@ export function WeekCalendar({ selectedDate, onDateChange }: WeekCalendarProps) 
         </Button>
       </div>
       
-      <div className="grid grid-cols-7 gap-1 w-full px-6">
+      <div className="grid grid-cols-7 gap-1 w-full px-4 sm:px-6">
         {weekDays.map((date, index) => (
           <button
             key={index}
