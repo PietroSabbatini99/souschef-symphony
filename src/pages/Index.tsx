@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Hero } from '@/components/landing/Hero';
@@ -117,7 +118,7 @@ const Index = () => {
                 <Button asChild size="lg" className="bg-white text-souschef-red hover:bg-gray-100 btn-hover">
                   <Link to="/signup">Create Free Account</Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white/10 btn-hover">
+                <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white/10 btn-hover font-medium">
                   <Link to="/features">Learn More</Link>
                 </Button>
               </div>
