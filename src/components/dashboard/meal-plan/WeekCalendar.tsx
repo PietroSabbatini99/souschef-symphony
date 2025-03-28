@@ -58,47 +58,45 @@ export function WeekCalendar({ selectedDate, onDateChange }: WeekCalendarProps) 
 
   return (
     <div className="w-full mb-6">
-      <div className="flex justify-center items-center mb-4 w-full">
-        <div className="flex items-center">
-          <Button variant="outline" size="icon" onClick={previousWeek} className="h-10 w-10">
-            <ChevronLeft size={18} />
-          </Button>
-          
-          <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="mx-2 px-3 py-1.5"
-              >
-                <CalendarIcon size={16} className="mr-2 text-gray-500" />
-                <span className="font-medium">
-                  {format(selectedDate, 'MMMM yyyy')}
-                </span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="center">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={(date) => {
-                  if (date) {
-                    onDateChange(date);
-                    setIsCalendarOpen(false);
-                  }
-                }}
-                initialFocus
-                className="pointer-events-auto"
-              />
-            </PopoverContent>
-          </Popover>
-          
-          <Button variant="outline" size="icon" onClick={nextWeek} className="h-10 w-10">
-            <ChevronRight size={18} />
-          </Button>
-        </div>
+      <div className="flex justify-between items-center mb-4 px-4">
+        <Button variant="outline" size="icon" onClick={previousWeek} className="h-10 w-10">
+          <ChevronLeft size={18} />
+        </Button>
+        
+        <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className="mx-2 px-3 py-1.5"
+            >
+              <CalendarIcon size={16} className="mr-2 text-gray-500" />
+              <span className="font-medium">
+                {format(selectedDate, 'MMMM yyyy')}
+              </span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="center">
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={(date) => {
+                if (date) {
+                  onDateChange(date);
+                  setIsCalendarOpen(false);
+                }
+              }}
+              initialFocus
+              className="pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
+        
+        <Button variant="outline" size="icon" onClick={nextWeek} className="h-10 w-10">
+          <ChevronRight size={18} />
+        </Button>
       </div>
       
-      <div className="grid grid-cols-7 gap-1 w-full px-1">
+      <div className="grid grid-cols-7 gap-1 w-full px-4">
         {weekDays.map((date, index) => (
           <button
             key={index}
