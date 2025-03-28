@@ -57,7 +57,7 @@ export function WeekCalendar({ selectedDate, onDateChange }: WeekCalendarProps) 
   };
 
   return (
-    <>
+    <div className="flex flex-col items-center w-full max-w-full">
       <div className="flex justify-center items-center mb-6 w-full">
         <div className="flex items-center justify-center mt-4 md:mt-0">
           <Button variant="outline" size="icon" onClick={previousWeek}>
@@ -122,6 +122,6 @@ export function WeekCalendar({ selectedDate, onDateChange }: WeekCalendarProps) 
           </button>
         ))}
       </div>
-    </>
+    </div>
   );
 }
