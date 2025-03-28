@@ -90,7 +90,7 @@ export function RecipesView() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="w-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
           <p className="text-gray-600"></p>

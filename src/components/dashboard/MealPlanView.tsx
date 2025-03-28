@@ -11,7 +11,7 @@ export function MealPlanView({ selectedDate, onDateChange }: MealPlanViewProps) 
   const isMobile = useIsMobile();
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="w-full">
       <WeekCalendar 
         selectedDate={selectedDate}
         onDateChange={onDateChange}
