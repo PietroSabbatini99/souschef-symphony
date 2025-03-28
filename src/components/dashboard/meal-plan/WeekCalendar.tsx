@@ -57,10 +57,10 @@ export function WeekCalendar({ selectedDate, onDateChange }: WeekCalendarProps) 
   };
 
   return (
-    <div className="w-full mb-8">
-      <div className="flex justify-between items-center mb-6 w-full">
-        <div className="flex items-center justify-center mt-4 md:mt-0">
-          <Button variant="outline" size="icon" onClick={previousWeek}>
+    <div className="w-full mb-6">
+      <div className="flex justify-center items-center mb-4 w-full">
+        <div className="flex items-center">
+          <Button variant="outline" size="icon" onClick={previousWeek} className="h-10 w-10">
             <ChevronLeft size={18} />
           </Button>
           
@@ -92,19 +92,19 @@ export function WeekCalendar({ selectedDate, onDateChange }: WeekCalendarProps) 
             </PopoverContent>
           </Popover>
           
-          <Button variant="outline" size="icon" onClick={nextWeek}>
+          <Button variant="outline" size="icon" onClick={nextWeek} className="h-10 w-10">
             <ChevronRight size={18} />
           </Button>
         </div>
       </div>
       
-      <div className="grid grid-cols-7 gap-1 w-full">
+      <div className="grid grid-cols-7 gap-1 w-full px-1">
         {weekDays.map((date, index) => (
           <button
             key={index}
             onClick={() => onDateChange(date)}
             className={`
-              flex flex-col items-center py-3 rounded-lg transition-colors
+              flex flex-col items-center py-2 rounded-lg transition-colors
               ${isSelected(date) 
                 ? 'bg-souschef-red text-white' 
                 : isToday(date)
@@ -113,7 +113,7 @@ export function WeekCalendar({ selectedDate, onDateChange }: WeekCalendarProps) 
               }
             `}
           >
-            <span className="text-xs font-medium mb-1">
+            <span className="text-xs font-medium">
               {DAYS[date.getDay()]}
             </span>
             <span className="text-lg font-semibold">
