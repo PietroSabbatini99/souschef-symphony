@@ -131,7 +131,7 @@ const Index = () => {
           <div className="container mx-auto px-4 md:px-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               <div>
-                <Logo className="bg-white" linkClassName="text-white" />
+                <Logo className="bg-souschef-red" linkClassName="text-white" />
                 <p className="mt-4 text-gray-400">
                   AI-powered meal planning and recipe generation.
                 </p>
